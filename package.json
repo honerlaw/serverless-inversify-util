@@ -1,6 +1,6 @@
 {
-  "name": "serverless-decorators",
-  "version": "1.0.0",
+  "name": "serverless-inversify-utils",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
