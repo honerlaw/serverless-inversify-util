@@ -2,7 +2,7 @@ export const TEMPLATE: string = `"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
 // run the setup file
-require("{{setup}}");
+require(".{{setup}}");
 
 // get serverless-decorators lib in order to get the inversify container
 var lib = require("serverless-inversify-util");
