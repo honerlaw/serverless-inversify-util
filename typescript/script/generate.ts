@@ -177,3 +177,5 @@ services.forEach((s: any) => {
     // write the handler.js file that hooks up everything
     fs.writeFileSync(path.join(outDir, "handler.js"), contents);
 });
+
+// @todo copy over node_modules into the outDir
