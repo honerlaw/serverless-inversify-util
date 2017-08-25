@@ -23,36 +23,42 @@ function handle(methodName, handlerName, event, context, callback) {
         }
     });
 
-    var passParams = [];
+    var paramCount = 0;
+    var passParams = {};
     var params = Reflect.getOwnMetadata("param", handler.constructor);
     params.forEach(function(p) {
         if (p.propertyKey === methodName) {
+            if (p.descriptor > paramCount) {
+                paramCount = p.descriptor;
+            }
             switch (p.data.type) {
                 case "event":
-                    passParams.push(event);
+                    passParams[p.descriptor] = event;
                     break;
                 case "context":
-                    passParams.push(context);
+                    passParams[p.descriptor] = context;
                     break;
                 case "path":
                     if (event && event.pathParameters) {
-                        passParams.push(event.pathParameters[p.data.name]);
+                        passParams[p.descriptor] = event.pathParameters[p.data.name];
                     }
                     break;
                 case "param":
                     if (event && event.queryStringParameters) {
-                        passParams.push(event.queryStringParameters[p.data.name]);
+                        passParams[p.descriptor] = event.queryStringParameters[p.data.name];
                     }
                     break;
                 case "body":
                     // @todo implement
                     break;
-                default:
-                    passParams.push(undefined);
-                    break;
             }
         }
     });
+
+    var passParamsArr = new Array(paramCount);
+    for (var index in passParams) {
+        passParamsArr[index] = passParams[index];
+    }
 
     try {
         if (foundMetadata) {
@@ -60,7 +66,7 @@ function handle(methodName, handlerName, event, context, callback) {
                 foundMetadata.middleware[index](event, context);
             }
         }
-        callback(null, method.apply(handler, passParams.reverse()));
+        callback(null, method.apply(handler, passParamsArr));
     } catch (err) {
         return callback(err);
     }
