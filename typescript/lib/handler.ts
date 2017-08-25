@@ -1,6 +1,3 @@
-/**
- * Create a mapping of some sort that can be used with serverless handler somehow
- */
 import {MetadataKey} from "./service";
 
 export interface IHandlerEvent {

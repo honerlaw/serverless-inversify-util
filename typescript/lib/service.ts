@@ -62,7 +62,8 @@ export interface IServiceData {
 
 export enum MetadataKey {
     SERVICE = "service",
-    EVENT_HANDLER = "event_handler"
+    EVENT_HANDLER = "event_handler",
+    PARAM = "param"
 }
 
 // designates a class that is the root for the service

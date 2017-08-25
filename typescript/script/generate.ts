@@ -15,7 +15,7 @@ import {IServiceData, MetadataKey} from "../lib/service";
  * 2. loads up the metadata from the generated code (DONE)
  * 3. builds the serverless.yml file from the metadata (DONE)
  * 4. outputs everything into a directory that is then used to upload to serverless (DONE)
- * 5. correctly parse and map data to given handler
+ * 5. correctly parse and map data to given handler (DONE)
  *
  * @todo heavily refactor this after basic functionality is complete (e.g. the above)
  *
@@ -68,8 +68,7 @@ if (services.length !== 1) {
 }
 
 const mainjs: string = main.replace(currentDir, "").replace(".ts", ".js");
-let contents: string = `
-"use strict";
+let contents: string = `"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
 // run the setup file
@@ -80,37 +79,65 @@ var lib = require("./typescript/lib/index.js");
 
 var container = lib.getContainer();
 
-`;
-
-const template: string = `function {{methodName}}(event, context, callback) {
-    var handler = container.getNamed(lib.TYPE.EventHandler, {{handlerName}});
-    var method = handler["{{methodName}}"];
+// Generic method to handle incoming event and correctly pass on to registered handlers
+function handle(methodName, handlerName, event, context, callback) {
+    var handler = container.getNamed(lib.TYPE.EventHandler, handlerName);
+    var method = handler[methodName];
 
     // get middleware for this handler's method
-    var found;
+    var foundMetadata;
     var metadata = Reflect.getOwnMetadata("event_handler", handler.constructor);
     metadata.forEach(function(m) {
-        if (m.propertyKey === "{{methodName}}") {
-            found = m;
+        if (m.propertyKey === methodName) {
+            foundMetadata = m;
+        }
+    });
+
+    var passParams = [];
+    var params = Reflect.getOwnMetadata("param", handler.constructor);
+    params.forEach(function(p) {
+        if (p.propertyKey === methodName) {
+            switch (p.data.type) {
+                case "event":
+                    passParams.push(event);
+                    break;
+                case "context":
+                    passParams.push(context);
+                    break;
+                case "path":
+                    passParams.push(event.pathParameters[p.data.name]);
+                    break;
+                case "param":
+                    passParams.push(event.queryStringParameters[p.data.name]);
+                    break;
+                case "body":
+                    // @todo implement
+                    break;
+                default:
+                    passParams.push(undefined);
+                    break;
+            }
         }
     });
 
     try {
-        if (found) {
-            for (var index in found.middleware) {
-                found.middleware[index](event, context);
+        if (foundMetadata) {
+            for (var index in foundMetadata.middleware) {
+                foundMetadata.middleware[index](event, context);
             }
         }
-        callback(null, method());
+        callback(null, method(...(passParams.reverse())));
     } catch (err) {
         return callback(err);
     }
 }
-exports.{{methodName}} = {{methodName}};
 
-{{methodName}}(null, null, function() {
-    console.log("CALLED", arguments);
-});
+`;
+
+const template: string = `function {{functionName}}(event, context, callback) {
+    handle("{{methodName}}", "{{handlerName}}", event, context, callback);
+}
+exports.{{functionName}} = {{functionName}};
 
 `;
 
@@ -122,15 +149,20 @@ services.forEach((s: any) => {
     serviceMetadata.handlers.forEach((handler) => {
         const handlerMetadata: IHandlerMetadata[] = Reflect.getOwnMetadata(MetadataKey.EVENT_HANDLER, handler);
         handlerMetadata.forEach((metadata) => {
+            const functionName: string = `${metadata.target.constructor.name}_${metadata.propertyKey}`;
+
+            // so we need to know the relative path to the handler.js file, which is just going to be handler.js...
             functions[metadata.propertyKey] = {
-                handler: "unknown", // @todo proper path to method
+                handler: `handler.${functionName}`,
                 events: metadata.events
             };
 
             // add the function to the handler.js file
+            // @todo proper template engine
             contents += template
+                .replace(new RegExp("{{functionName}}", "g"), functionName)
                 .replace(new RegExp("{{methodName}}", "g"), metadata.propertyKey)
-                .replace(new RegExp("{{handlerName}}", "g"), `"${metadata.target.constructor.name}"`);
+                .replace(new RegExp("{{handlerName}}", "g"), `${metadata.target.constructor.name}`);
         });
     });
 
