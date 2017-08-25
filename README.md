@@ -1,0 +1,2 @@
+## Serverless Inversify Utils
+Serverless Inversify Utils is a simple utility that wraps serverless config generation and mapping with inversify through decorators. To get a better example of how to use these utils please checkout an [example](example).
