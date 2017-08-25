@@ -6,8 +6,8 @@ import * as path from "path";
 import * as ts from "typescript";
 import * as YAML from "yamljs";
 import {IHandlerMetadata} from "../handler";
-import {IService, TYPE} from "../index";
 import {IServiceData, MetadataKey} from "../service";
+import {IService, TYPE} from "../util";
 import {HANDLER_TEMPLATE, TEMPLATE} from "./template";
 import {getServices} from "./util";
 

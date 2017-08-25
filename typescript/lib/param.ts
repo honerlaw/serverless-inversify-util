@@ -1,7 +1,7 @@
 import {MetadataKey} from "./service";
 
 export interface IParam {
-    type: "body" | "path" | "param" | "context" | "event",
+    type: "body" | "path" | "param" | "context" | "event";
     name?: string;
 }
 
