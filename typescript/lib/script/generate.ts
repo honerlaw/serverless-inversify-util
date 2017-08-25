@@ -55,6 +55,11 @@ function getContainer(): Container {
                 indexReq = req;
             }
         });
+
+    // @todo find a better way to handle this and the same in the template below
+    if (!indexReq) {
+        return require("inversify-serverless-util").getContainer();
+    }
     return indexReq.getContainer();
 }
 
@@ -77,7 +82,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require(".${mainjs}");
 
 // get serverless-decorators lib in order to get the inversify container
-var lib = require("./typescript/lib/index.js");
+var lib = require("serverless-inversify-util");
 
 var container = lib.getContainer();
 
