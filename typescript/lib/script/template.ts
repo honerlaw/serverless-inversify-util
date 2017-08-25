@@ -56,7 +56,7 @@ function handle(methodName, handlerName, event, context, callback) {
                 foundMetadata.middleware[index](event, context);
             }
         }
-        callback(null, method(...(passParams.reverse())));
+        callback(null, method.apply(handler, passParams.reverse()));
     } catch (err) {
         return callback(err);
     }
