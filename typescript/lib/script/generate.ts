@@ -58,7 +58,7 @@ function getContainer(): Container {
 
     // @todo find a better way to handle this and the same in the template below
     if (!indexReq) {
-        return require("inversify-serverless-util").getContainer();
+        return require("serverless-inversify-util").getContainer();
     }
     return indexReq.getContainer();
 }
