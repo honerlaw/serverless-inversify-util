@@ -1,14 +1,14 @@
 {
   "name": "serverless-inversify-utils",
   "version": "0.0.1",
-  "description": "",
+  "description": "A set of decorators to be used with inversify to generate serverless config and handlers.",
   "main": "index.js",
   "scripts": {
     "generate": "ts-node ./typescript/script/generate.ts ./example/typescript/index.ts ./example/tsconfig.json",
     "test": "TS_NODE_PROJECT=./typescript/tsconfig.json mocha --compilers ts:ts-node/register ./typescript/test/**/*.ts"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Derek Honerlaw",
+  "license": "MIT",
   "devDependencies": {
     "@types/chai": "^4.0.4",
     "@types/mocha": "^2.2.42",
