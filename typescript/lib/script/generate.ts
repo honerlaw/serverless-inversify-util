@@ -1,11 +1,13 @@
+#! /usr/bin/env node
+
 import * as fs from "fs";
 import {Container} from "inversify";
 import * as path from "path";
 import * as ts from "typescript";
 import * as YAML from "yamljs";
-import {IHandlerMetadata} from "../lib/handler";
-import {Service, TYPE} from "../lib/index";
-import {IServiceData, MetadataKey} from "../lib/service";
+import {IHandlerMetadata} from "../handler";
+import {IService, TYPE} from "../index";
+import {IServiceData, MetadataKey} from "../service";
 
 /**
  *
@@ -59,7 +61,7 @@ function getContainer(): Container {
 const container: Container = getContainer();
 
 // find all services that are registered
-const services: Service[] = container.getAll<Service>(TYPE.Service);
+const services: IService[] = container.getAll<IService>(TYPE.Service);
 
 // @todo allow multiple services
 if (services.length !== 1) {

@@ -4,16 +4,18 @@
     "lib": ["es6", "dom"],
     "types": ["node"],
     "allowJs": false,
-    "outDir": "./bin",
+    "outDir": "../dist",
     "rootDir": "./",
     "sourceMap": true,
     "noImplicitAny": false,
     "moduleResolution": "node",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "declarationDir": "../dist/types"
   },
-  "filesGlob": [
-    "./**/*.ts"
+  "include": [
+    "./lib/**/*.ts"
   ],
   "compileOnSave": false
 }

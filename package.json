@@ -2,8 +2,14 @@
   "name": "serverless-inversify-util",
   "version": "0.0.1",
   "description": "A set of decorators to be used with inversify to generate serverless config and handlers.",
-  "main": "index.js",
+  "main": "./dist/lib/index.js",
+  "types": "./dist/lib/index.d.ts",
+  "bin": {
+    "serverless-inversify-util": "dist/lib/script/generate.js"
+  },
   "scripts": {
+    "clean": "rm -rf ./bin ./dist ./typescript/bin",
+    "prepublish": "npm run clean && tsc -p ./typescript/tsconfig.json",
     "generate": "ts-node ./typescript/script/generate.ts ./example/typescript/index.ts ./example/tsconfig.json",
     "test": "TS_NODE_PROJECT=./typescript/tsconfig.json mocha --compilers ts:ts-node/register ./typescript/test/**/*.ts"
   },
