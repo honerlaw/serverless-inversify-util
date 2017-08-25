@@ -1,8 +1,0 @@
-{
-  "extends": ["tslint:latest", "tslint:recommended"],
-  "rules": {
-    "no-console": false,
-    "trailing-comma": false,
-    "object-literal-sort-keys": false
-  }
-}

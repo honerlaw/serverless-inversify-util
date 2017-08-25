@@ -36,7 +36,7 @@ resources:
 
 // @todo potentially just use json to yml for now to make life easier?
 export interface IServiceData {
-    name: string;
+    service: string;
     provider: {
         name: "aws";
         stage: string;
