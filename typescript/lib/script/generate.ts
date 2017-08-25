@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 
 import * as fs from "fs";
+import {ncp} from "ncp";
 import * as path from "path";
 import * as ts from "typescript";
 import * as YAML from "yamljs";
@@ -76,4 +77,10 @@ services.forEach((s: any) => {
     fs.writeFileSync(path.join(OUT_DIR, "handler.js"), contents.join(""));
 });
 
-// @todo copy over node_modules into the outDir
+// copy node_modules into the generated folder
+ncp(path.resolve("./node_modules/"), path.join(OUT_DIR, "node_modules"), (err) => {
+    if (err) {
+        console.error(err);
+        process.exit(1);
+    }
+});

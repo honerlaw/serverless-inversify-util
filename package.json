@@ -17,13 +17,15 @@
   "license": "MIT",
   "dependencies": {
     "inversify": "^4.3.0",
+    "ncp": "^2.0.0",
+    "reflect-metadata": "^0.1.10",
     "typescript": "^2.4.2",
-    "yamljs": "^0.3.0",
-    "reflect-metadata": "^0.1.10"
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "@types/chai": "^4.0.4",
     "@types/mocha": "^2.2.42",
+    "@types/ncp": "^2.0.1",
     "@types/node": "^8.0.25",
     "@types/yamljs": "^0.2.30",
     "chai": "^4.1.1",

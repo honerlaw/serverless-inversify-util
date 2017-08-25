@@ -35,10 +35,14 @@ function handle(methodName, handlerName, event, context, callback) {
                     passParams.push(context);
                     break;
                 case "path":
-                    passParams.push(event.pathParameters[p.data.name]);
+                    if (event && event.pathParameters) {
+                        passParams.push(event.pathParameters[p.data.name]);
+                    }
                     break;
                 case "param":
-                    passParams.push(event.queryStringParameters[p.data.name]);
+                    if (event && event.queryStringParameters) {
+                        passParams.push(event.queryStringParameters[p.data.name]);
+                    }
                     break;
                 case "body":
                     // @todo implement
