@@ -13,8 +13,11 @@ import {IServiceData, MetadataKey} from "../lib/service";
  *
  * 1. compiles the code down using given tsconfig (DONE)
  * 2. loads up the metadata from the generated code (DONE)
- * 3. builds the serverless.yml file from the metadata
- * 4. outputs everything into a directory that is then used to upload to serverless
+ * 3. builds the serverless.yml file from the metadata (DONE)
+ * 4. outputs everything into a directory that is then used to upload to serverless (DONE)
+ * 5. correctly parse and map data to given handler
+ *
+ * @todo heavily refactor this after basic functionality is complete (e.g. the above)
  *
  */
 
