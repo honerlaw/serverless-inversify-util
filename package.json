@@ -1,5 +1,5 @@
 {
-  "name": "serverless-inversify-utils",
+  "name": "serverless-inversify-util",
   "version": "0.0.1",
   "description": "A set of decorators to be used with inversify to generate serverless config and handlers.",
   "main": "index.js",
