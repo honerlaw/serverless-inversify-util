@@ -41,6 +41,7 @@ export interface IServiceData {
         name: "aws";
         stage: string;
         region: string;
+        runtime: string;
         environment?: {
             [key: string]: string;
         };
@@ -50,13 +51,16 @@ export interface IServiceData {
             Resource: string;
         }];
     };
-    resources?: [{
-        name: string;
-        type: string;
-        properties: {
-            [key: string]: any // @todo this would need to be able to handle recursion really well
-        };
-    }];
+    resources?: {
+        Resources: {
+            [key: string]: {
+                Type: string;
+                Properties: {
+                    [key: string]: any;
+                }
+            }
+        }
+    };
     handlers: any[];
 }
 
