@@ -79,12 +79,9 @@ export class Generator {
     }
 
     private getServerlessYAMLConfig(metadatum: IMetadata): string {
-        const clone: IMetadata = JSON.parse(JSON.stringify(metadatum));
-        delete clone.service.handlers;
-
         // generate the function config from metadata
         const functions: { [key: string]: object } = {};
-        clone.handlers.forEach((handlers: IHandlerMetadata[]) => {
+        metadatum.handlers.forEach((handlers: IHandlerMetadata[]) => {
             handlers.forEach((handler) => {
                 const functionName: string = `${handler.target.constructor.name}_${handler.propertyKey}`;
                 functions[handler.propertyKey] = {
@@ -93,6 +90,8 @@ export class Generator {
                 };
             });
         });
+        const clone: IMetadata = JSON.parse(JSON.stringify(metadatum));
+        delete clone.service.handlers;
         (clone.service as any).functions = functions;
 
         return YAML.stringify(clone.service, Infinity, 2);
