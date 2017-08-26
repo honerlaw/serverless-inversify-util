@@ -9,10 +9,18 @@ import {IServiceData, MetadataKey} from "../service";
 import {IService, TYPE} from "../util";
 import {HANDLER_TEMPLATE} from "./template";
 
+interface IMetadata {
+    service: IServiceData;
+    handlers: IHandlerMetadata[];
+}
+
 export class Generator {
 
     private static CURRENT_DIR: string = path.resolve();
     private static OUT_DIR: string = path.resolve("./bin");
+    private static writeFile(fileName: string, contents: string): void {
+        fs.writeFileSync(path.join(Generator.OUT_DIR, fileName), contents);
+    }
 
     private readonly mainPath: string;
     private readonly mainJsPath: string;
@@ -31,50 +39,68 @@ export class Generator {
         const emittedFiles: string[] = this.compile();
         const services: IService[] = this.getServices(emittedFiles);
 
-        // @todo get the generated files
-        const contents: string[] = []; // [TEMPLATE.replace(new RegExp("{{setup}}", "g"), mainjs)];
+        const metadata: IMetadata[] = this.getMetadata(services);
 
-        services.forEach((s: any) => {
-            const serviceMetadata: IServiceData = Reflect.getOwnMetadata(MetadataKey.SERVICE, s.constructor).data;
+        const template: string = this.getTemplate();
 
-            // add each "handler" as a serverless function to yaml
-            const functions: { [key: string]: object } = {};
-            serviceMetadata.handlers.forEach((handler) => {
-                const handlerMetadata: IHandlerMetadata[] = Reflect.getOwnMetadata(MetadataKey.EVENT_HANDLER, handler);
-                handlerMetadata.forEach((metadata) => {
-                    const functionName: string = `${metadata.target.constructor.name}_${metadata.propertyKey}`;
+        metadata.forEach((metadatum) => {
+            const yaml: string = this.getServerlessYAMLConfig(metadatum);
+            const contents: string = this.getContents(template, metadatum);
 
-                    // so we need to know the relative path to the handler.js file, which is just going to be handler.js
-                    functions[metadata.propertyKey] = {
-                        handler: `handler.${functionName}`,
-                        events: metadata.events
-                    };
-
-                    // add the function to the handler.js file
-                    // @todo proper template engine
-                    contents.push(HANDLER_TEMPLATE
-                        .replace(new RegExp("{{functionName}}", "g"), functionName)
-                        .replace(new RegExp("{{methodName}}", "g"), metadata.propertyKey)
-                        .replace(new RegExp("{{handlerName}}", "g"), `${metadata.target.constructor.name}`));
-                });
-            });
-
-            // fix config before converting to yaml
-            delete serviceMetadata.handlers;
-            (serviceMetadata as any).functions = functions;
-
-            // convert to yaml and write to file in proper directory
-            const yaml: string = YAML.stringify(serviceMetadata, Infinity, 2);
-            fs.writeFileSync(path.join(Generator.OUT_DIR, "serverless.yml"), yaml);
-
-            // write the handler.js file that hooks up everything
-            fs.writeFileSync(path.join(Generator.OUT_DIR, "handler.js"), contents.join(""));
+            Generator.writeFile("serverless.yml", yaml);
+            Generator.writeFile("handler.js", contents);
         });
     }
 
+    private getContents(template: string, metadatum: IMetadata): string {
+        // @todo proper template engine
+        const contents: string[] = [template.replace(new RegExp("{{setup}}", "g"), this.mainJsPath)];
+        metadatum.handlers.forEach((handler: IHandlerMetadata) => {
+            const functionName: string = `${handler.target.constructor.name}_${handler.propertyKey}`;
+            contents.push(HANDLER_TEMPLATE
+                .replace(new RegExp("{{functionName}}", "g"), functionName)
+                .replace(new RegExp("{{methodName}}", "g"), handler.propertyKey)
+                .replace(new RegExp("{{handlerName}}", "g"), `${handler.target.constructor.name}`));
+        });
+        return contents.join("");
+    }
+
+    private getServerlessYAMLConfig(metadatum: IMetadata): string {
+        const clone: IMetadata = JSON.parse(JSON.stringify(metadatum));
+        delete clone.service.handlers;
+
+        // generate the function config from metadata
+        const functions: { [key: string]: object } = {};
+        clone.handlers.forEach((handler: IHandlerMetadata) => {
+            const functionName: string = `${handler.target.constructor.name}_${handler.propertyKey}`;
+            functions[handler.propertyKey] = {
+                handler: `handler.${functionName}`,
+                events: handler.events
+            };
+        });
+        (clone.service as any).functions = functions;
+
+        return YAML.stringify(clone.service, Infinity, 2);
+    }
+
+    private getMetadata(services: IService[]): IMetadata[] {
+        const metadata: IMetadata[] = [];
+        services.forEach((s: any) => {
+            const service: IServiceData = Reflect.getOwnMetadata(MetadataKey.SERVICE, s.constructor).data;
+            const handlers: IHandlerMetadata[] = service.handlers
+                .map((handler) => Reflect.getOwnMetadata(MetadataKey.EVENT_HANDLER, handler));
+            metadata.push({
+                service,
+                handlers
+            });
+        });
+        return metadata;
+    }
+
     private getTemplate(): string {
+        // handle either the compiled js or the non-compiled ts
         const tsFilePath: string = path.join(__dirname, "handler.template.ts");
-        const jsFilePath: string = path.join(__dirname, "handlertemplate.js");
+        const jsFilePath: string = path.join(__dirname, "handler.template.js");
 
         if (fs.existsSync(jsFilePath)) {
             return fs.readFileSync(jsFilePath).toString();
@@ -91,24 +117,24 @@ export class Generator {
         const outputs: any[] = [];
 
         const compilerHost: ts.CompilerHost = {
-             getSourceFile: (filename, languageVersion) => {
-                 if (filename === "template.ts") {
-                     return ts.createSourceFile(filename, contents, compilerOptions.target, false);
-                 }
-                 return undefined;
-             },
-             writeFile: (name, text, writeByteOrderMark) => {
-                 outputs.push({ name, text, writeByteOrderMark });
-             },
-             readFile: () => "",
-             fileExists: () => true,
-             getDirectories: () => [],
-             getDefaultLibFileName: (options: ts.CompilerOptions) => "lib.d.ts",
-             useCaseSensitiveFileNames: () => false,
-             getCanonicalFileName: (filename) => filename,
-             getCurrentDirectory: () => "",
-             getNewLine: () => "\n"
-         };
+            getSourceFile: (filename, languageVersion) => {
+                if (filename === "template.ts") {
+                    return ts.createSourceFile(filename, contents, compilerOptions.target, false);
+                }
+                return undefined;
+            },
+            writeFile: (name, text, writeByteOrderMark) => {
+                outputs.push({name, text, writeByteOrderMark});
+            },
+            readFile: () => "",
+            fileExists: () => true,
+            getDirectories: () => [],
+            getDefaultLibFileName: (options: ts.CompilerOptions) => "lib.d.ts",
+            useCaseSensitiveFileNames: () => false,
+            getCanonicalFileName: (filename) => filename,
+            getCurrentDirectory: () => "",
+            getNewLine: () => "\n"
+        };
 
         ts.createProgram(["template.ts"], compilerOptions, compilerHost).emit();
 

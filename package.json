@@ -9,7 +9,7 @@
   },
   "scripts": {
     "clean": "rm -rf ./bin ./dist ./typescript/bin && find ./typescript -type f -name *.js -delete",
-    "prepublish": "npm run clean && tsc -p ./typescript/tsconfig.json",
+    "prepare": "npm run clean && tsc -p ./typescript/tsconfig.json",
     "generate": "ts-node ./typescript/script/generate.ts ./example/typescript/index.ts ./example/tsconfig.json",
     "test": "npm run clean && TS_NODE_PROJECT=./typescript/tsconfig.json mocha --compilers ts:ts-node/register ./typescript/test/**/*.ts"
   },

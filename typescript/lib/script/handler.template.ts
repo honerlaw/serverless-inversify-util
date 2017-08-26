@@ -25,16 +25,12 @@ export function handle(methodName: string, handlerName: string, event, context, 
         }
     });
 
-    let paramCount: number = 0;
-    const passParams: { [key: number]: any } = {};
+    // @todo if name is not supplied for path / param / body, use function parameter name instead
+    const passParams: any[] = new Array(method.length);
     const params: IParamMetadata[] = Reflect.getOwnMetadata("param", handler.constructor);
     params.forEach((metadata) => {
         if (metadata.propertyKey === methodName) {
             const metadataIndex: number = metadata.descriptor as number;
-
-            if (metadataIndex > paramCount) {
-                paramCount = metadataIndex;
-            }
             switch (metadata.data.type) {
                 case "event":
                     passParams[metadataIndex] = event;
@@ -59,28 +55,7 @@ export function handle(methodName: string, handlerName: string, event, context, 
         }
     });
 
-    const passParamsArr = new Array(paramCount);
-    for (const paramIndex in passParams) {
-        if (passParams.hasOwnProperty(paramIndex)) {
-            passParamsArr[paramIndex] = passParams[paramIndex];
-        }
-    }
-
-    // wrap everything in a promise (handle both promise and non-promise)
-    const promises: Array<Promise<any>> = [];
-    if (foundHandlerMetadata) {
-        foundHandlerMetadata.middleware.forEach((middleware) => {
-            promises.push(Promise.resolve(middleware(event, context)));
-        });
-    }
-    promises.push(Promise.resolve(method.apply(handler, passParamsArr)));
-
-    // wait for everything to resolve
-    Promise.all(promises).then((values: any[]) => {
-
-        // the response is the last promises's result
-        callback(null, values[promises.length - 1]);
-    }).catch((err) => {
+    const handlerError = (err) => {
         if (err.statusCode) {
             return callback(null, {
                 statusCode: err.statusCode,
@@ -90,5 +65,26 @@ export function handle(methodName: string, handlerName: string, event, context, 
             });
         }
         callback(err);
-    });
+    };
+
+    try {
+        // wrap everything in a promise (handle both promise and non-promise)
+        const promises: Array<Promise<any>> = [];
+        if (foundHandlerMetadata) {
+            foundHandlerMetadata.middleware.forEach((middleware) => {
+                promises.push(Promise.resolve(middleware(event, context)));
+            });
+        }
+        promises.push(Promise.resolve(method.apply(handler, passParams)));
+
+        // wait for everything to resolve
+        Promise.all(promises).then((values: any[]) => {
+
+            // the response is the last promises's result
+            callback(null, values[promises.length - 1]);
+        }).catch(handlerError);
+
+    } catch (err) {
+        handlerError(err);
+    }
 }
