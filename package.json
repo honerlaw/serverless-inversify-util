@@ -11,7 +11,7 @@
     "clean": "rm -rf ./bin ./dist ./typescript/bin ./test-bin && find ./typescript -type f -name *.js -delete",
     "prepare": "npm run clean && tsc -p ./typescript/tsconfig.json",
     "generate": "ts-node ./typescript/script/generate.ts ./example/typescript/index.ts ./example/tsconfig.json",
-    "test": "npm run clean && TS_NODE_PROJECT=./typescript/tsconfig.json mocha --compilers ts:ts-node/register ./typescript/test/lib/**/*.ts"
+    "test": "npm run clean && TS_NODE_PROJECT=./typescript/tsconfig.json mocha -t 100000 --compilers ts:ts-node/register ./typescript/test/lib/**/*.ts"
   },
   "author": "Derek Honerlaw",
   "license": "MIT",

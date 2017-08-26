@@ -1,7 +1,7 @@
+import {injectable} from "inversify";
 import "reflect-metadata";
 import {Service} from "../../lib/service";
 import {MockHandler} from "./mock-handler";
-import {injectable} from "inversify";
 
 @Service({
     service: "test service name",

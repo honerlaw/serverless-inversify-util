@@ -27,11 +27,11 @@ describe("Generator", () => {
     it("should correctly get contents", () => {
         const propertyKey: string = "propertyKey";
         const testHandler: object = {};
-        const path: string = "path/to/things";
+        const reqPath: string = "path/to/things";
         const template: string = `require("{{setup}}");
         `;
 
-        const contents: string = (GeneratorMock.object as any).getContents(template, path, {
+        const contents: string = (GeneratorMock.object as any).getContents(template, reqPath, {
             handlers: [[{
                 events: [],
                 propertyKey,

@@ -17,5 +17,5 @@
   "include": [
     "./lib/**/*.ts"
   ],
-  "compileOnSave": true
+  "compileOnSave": false
 }
