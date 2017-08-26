@@ -6,7 +6,7 @@
     "allowJs": false,
     "outDir": "../dist",
     "rootDir": "./",
-    "sourceMap": true,
+    "sourceMap": false,
     "noImplicitAny": false,
     "moduleResolution": "node",
     "experimentalDecorators": true,
