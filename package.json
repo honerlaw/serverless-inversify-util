@@ -8,10 +8,10 @@
     "serverless-inversify-util": "dist/lib/script/generate.js"
   },
   "scripts": {
-    "clean": "rm -rf ./bin ./dist ./typescript/bin",
+    "clean": "rm -rf ./bin ./dist ./typescript/bin && find ./typescript -type f -name *.js -delete",
     "prepublish": "npm run clean && tsc -p ./typescript/tsconfig.json",
     "generate": "ts-node ./typescript/script/generate.ts ./example/typescript/index.ts ./example/tsconfig.json",
-    "test": "TS_NODE_PROJECT=./typescript/tsconfig.json mocha --compilers ts:ts-node/register ./typescript/test/**/*.ts"
+    "test": "npm run clean && TS_NODE_PROJECT=./typescript/tsconfig.json mocha --compilers ts:ts-node/register ./typescript/test/**/*.ts"
   },
   "author": "Derek Honerlaw",
   "license": "MIT",
@@ -27,9 +27,11 @@
     "@types/mocha": "^2.2.42",
     "@types/ncp": "^2.0.1",
     "@types/node": "^8.0.25",
+    "@types/proxyquire": "^1.3.28",
     "@types/yamljs": "^0.2.30",
     "chai": "^4.1.1",
     "mocha": "^3.5.0",
+    "proxyquire": "^1.8.0",
     "ts-node": "^3.3.0",
     "tslint": "^5.6.0",
     "typemoq": "^2.0.1"

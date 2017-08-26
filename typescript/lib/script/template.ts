@@ -66,9 +66,21 @@ function handle(methodName, handlerName, event, context, callback) {
                 foundMetadata.middleware[index](event, context);
             }
         }
-        callback(null, method.apply(handler, passParamsArr));
+        Promise.resolve(method.apply(handler, passParamsArr)).then(function(value) {
+            callback(null, value);
+        }).catch(function(err) {
+            throw err;
+        });
     } catch (err) {
-        return callback(err);
+        if (err.statusCode) {
+            return callback(null, {
+                statusCode: err.statusCode,
+                body: JSON.stringify({
+                    message: err.message
+                })
+            });
+        }
+        callback(err);
     }
 }
 
