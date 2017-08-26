@@ -1,40 +1,34 @@
-/*
-Below needs to be converted to a generic source
-resources:
-  Resources:
-    userTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: user
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-          - AttributeName: applicationId
-            AttributeType: S
-          - AttributeName: email
-            AttributeType: S
-        KeySchema:
-          - AttributeName: applicationId
-            KeyType: HASH
-          - AttributeName: id
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        GlobalSecondaryIndexes:
-          - IndexName: EmailIndex
-            KeySchema:
-              - AttributeName: email
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
+// @todo improve this type definition
+export interface IDynamoDBResourceProperties {
+    TableName: string;
+    AttributeDefinitions?: [{
+        AttributeName: string;
+        AttributeType: string;
+    }];
+    KeySchema?: [{
+        AttributeName: string;
+        KeyType: "HASH" | "RANGE";
+    }];
+    ProvisionedThroughput?: {
+        ReadCapacityUnits?: number;
+        WriteCapacityUnits?: number;
+    };
+    GlobalSecondaryIndexes?: [{
+        IndexName: string;
+        KeySchema?: [{
+            AttributeName: string;
+            KeyType: "HASH" | "RANGE";
+        }];
+        Projection?: {
+            ProjectionType: "ALL"
+        };
+        ProvisionedThroughput?: {
+            ReadCapacityUnits?: number;
+            WriteCapacityUnits?: number;
+        };
+    }];
+}
 
- */
-
-// @todo potentially just use json to yml for now to make life easier?
 export interface IServiceData {
     service: string;
     provider: {
@@ -53,11 +47,9 @@ export interface IServiceData {
     };
     resources?: {
         Resources: {
-            [key: string]: {
+            [resourceName: string]: {
                 Type: string;
-                Properties: {
-                    [key: string]: any;
-                }
+                Properties: IDynamoDBResourceProperties;
             }
         }
     };
