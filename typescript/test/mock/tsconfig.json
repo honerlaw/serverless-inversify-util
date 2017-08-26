@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["es2015", "es6", "dom"],
+    "types": ["node"],
+    "allowJs": false,
+    "outDir": "../dist",
+    "rootDir": "./",
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": [
+    "./lib/**/*.ts"
+  ],
+  "compileOnSave": true
+}

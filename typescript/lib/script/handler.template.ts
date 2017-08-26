@@ -7,7 +7,8 @@ import {IParamMetadata} from "../param";
 require(".{{setup}}"); // tslint:disable-line
 
 // get serverless-decorators lib in order to get the inversify container
-const lib = require("serverless-inversify-util"); // tslint:disable-line
+// hack to allow running local and when a package
+const lib = require(__filename.indexOf(".ts") !== -1 ? "../util" : "serverless-inversify-util"); // tslint:disable-line
 
 const container: Container = lib.getContainer();
 
