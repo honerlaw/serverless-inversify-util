@@ -6,7 +6,7 @@ Serverless Inversify Util is a simple utility that wraps serverless config gener
 You can install `serverless-inversify-util` using npm:
 
 ```
-$ npm install inversify reflect-metadata yamljs ncp serverless-inversify-util
+$ npm install serverless-inversify-util inversify reflect-metadata yamljs ncp typescript
 ```
 
 The type `serverless-inversify-util` definitions are included in the package as well.
