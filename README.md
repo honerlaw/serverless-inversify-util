@@ -94,7 +94,7 @@ $ serverless-inversify-util ./path/to/entry_point.ts ./path/to/tsconfig.json
 
 `serverless-inversify-util` may need to be installed globally in order for the above command to run.
 
-## Serverless Inversify Util Docs
+## Docs
 
 ### RequestParam
 
@@ -244,3 +244,4 @@ class TestService {
 3. Allow multiple services to be registered.
 4. Clean up the code as much as possible and potentially remove some of the dependencies.
 5. Webpack support through plugins?
+6. More default handlers (e.g. S3, etc)
