@@ -154,6 +154,7 @@ export class Generator {
 
     private compile(outDir: string): string[] {
         this.compilerOptions.outDir = path.resolve(outDir);
+        this.compilerOptions.sourceMap = false;
         const program: ts.Program = ts.createProgram([this.mainPath], this.compilerOptions);
         return program.emit().emittedFiles;
     }

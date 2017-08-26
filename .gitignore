@@ -3,3 +3,4 @@ node_modules/
 typescript/bin/
 bin/
 dist/
+test-bin/
