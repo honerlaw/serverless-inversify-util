@@ -1,3 +1,4 @@
+import * as child from "child_process";
 import * as fs from "fs-extra";
 import {Container} from "inversify";
 import * as path from "path";
@@ -20,6 +21,11 @@ exports.{{functionName}} = {{functionName}};
 
 `;
 
+/**
+ * TODO
+ * - better translation for compilerOptions (e.g. target "es5" becomes ts.ScriptTarget.ES5)
+ */
+
 export class Generator {
 
     private static CURRENT_DIR: string = path.resolve();
@@ -30,13 +36,17 @@ export class Generator {
 
     private readonly mainPath: string;
     private readonly mainJsPath: string;
+    private readonly deploy: boolean;
+    private readonly stage: string;
     private readonly compilerOptions: ts.CompilerOptions;
 
-    constructor(mainPath: string, config: string | object) {
+    constructor(mainPath: string, config: string | object, deploy?: boolean, stage?: string) {
         this.mainPath = path.resolve(mainPath);
         this.mainJsPath = this.mainPath.replace(Generator.CURRENT_DIR, "").replace(".ts", ".js");
         this.compilerOptions = (typeof config === "string" ?
             JSON.parse(fs.readFileSync(path.resolve(config)).toString()).compilerOptions : config);
+        this.deploy = deploy;
+        this.stage = stage;
     }
 
     public execute(binDir: string = "./bin"): void {
@@ -52,6 +62,7 @@ export class Generator {
         const formattedName: string = metadata.service.service.replace(/[^a-zA-Z]/g, "");
         const outDir: string = path.join(path.resolve(binDir), formattedName);
 
+        // make sure directory exists to copy into
         fs.ensureDirSync(outDir);
 
         // write all of the files to the correct outDir path (./bin/serviceName)
@@ -59,6 +70,9 @@ export class Generator {
         Generator.writeFile(outDir, "handler.js", contents);
         this.copyNodeModules(outDir);
         this.copyFiles(path.resolve(binDir), outDir, emittedFiles);
+
+        // deploy the service if the deploy flag set
+        this.deployService(outDir);
     }
 
     private getContents(template: string, mainJsPath: string, metadatum: IMetadata): string {
@@ -91,6 +105,11 @@ export class Generator {
         const clone: IMetadata = JSON.parse(JSON.stringify(metadatum));
         delete clone.service.handlers;
         (clone.service as any).functions = functions;
+
+        // set stage if applicable
+        if (this.stage) {
+            clone.service.provider.stage = this.stage;
+        }
 
         return YAML.stringify(clone.service, Infinity, 2);
     }
@@ -175,6 +194,19 @@ export class Generator {
             fs.ensureDirSync(destDir);
 
             fs.writeFileSync(dest, fs.readFileSync(file));
+        });
+    }
+
+    private deployService(outDir: string): void {
+        if (this.deploy !== true) {
+            return;
+        }
+        child.exec(`cd ${outDir} && serverless deploy`, (error: Error, stdout: string, stderr: string) => {
+            if (error) {
+                console.error(error);
+                process.exit(1);
+            }
+            console.log(stdout, stderr);
         });
     }
 
