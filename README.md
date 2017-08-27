@@ -6,7 +6,7 @@ Serverless Inversify Util is a simple utility that wraps serverless config gener
 You can install `serverless-inversify-util` using npm:
 
 ```
-$ npm install serverless-inversify-util inversify reflect-metadata yamljs fs-extra typescript
+$ npm install serverless-inversify-util inversify reflect-metadata
 ```
 
 The type `serverless-inversify-util` definitions are included in the package as well.
@@ -89,8 +89,12 @@ register(container);
 Finally, the deployment directory needs to be generated. This directory will contain a generated serverless.yml, a generated handler.js, node_modules directory, and your project's compiled typescript code.
 
 ```
-$ serverless-inversify-util ./path/to/entry_point.ts ./path/to/tsconfig.json
+$ serverless-inversify-util -s ./path/to/entry_point.ts -p ./path/to/tsconfig.json -d -e test
 ```
+
+The service entry point (`-s`, `--service`) and the tsconfig path (`-p`, `--project`) are required. The paths can be absolute or relative.
+
+There are two optional flags as well. `-d, --deploy` denotes whether the service should be deployed using `serverless deploy` after the generator is done, the default is to *NOT* deploy. `-e, --env` is the environment or stage to deploy to and if not specified will default to the stage specified in the `@Service` decorator. 
 
 `serverless-inversify-util` may need to be installed globally in order for the above command to run.
 
