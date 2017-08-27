@@ -8,7 +8,7 @@
     "serverless-inversify-util": "dist/lib/script/generate.js"
   },
   "scripts": {
-    "clean": "rm -rf ./bin ./dist ./typescript/bin ./test-bin && find ./typescript -type f -name *.js -delete",
+    "clean": "rm -rf ./bin ./dist ./typescript/bin ./test-bin ./nyc_output ./coverage && find ./typescript -type f -name *.js -delete",
     "prepare": "npm run clean && tsc -p ./typescript/tsconfig.json",
     "generate": "ts-node ./typescript/script/generate.ts ./example/typescript/index.ts ./example/tsconfig.json",
     "test": "npm run clean && TS_NODE_PROJECT=./typescript/tsconfig.json nyc mocha -t 100000 --recursive --compilers ts:ts-node/register --bail ./typescript/test/lib"

@@ -156,4 +156,36 @@ describe("Handler", () => {
         }]);
     });
 
+    it("should properly register both events with the event handler", () => {
+        const path: string = "/path";
+        const method: "GET" = "GET";
+        const bucket: string = "bucket";
+        const event: string = "event";
+        const middleware: HandlerMiddleware = (e: any, c: any) => { // tslint:disable-line
+        };
+        const middlewareTwo: HandlerMiddleware = (e: any, c: any) => { // tslint:disable-line
+        };
+
+        S3Handler(bucket, event, middleware, middlewareTwo)(target, propertyKey, null);
+        HttpHandler(path, method, middleware, middlewareTwo)(target, propertyKey, null);
+
+        chai.expect(Reflect.hasOwnMetadata(MetadataKey.EVENT_HANDLER, target.constructor)).to.be.true; // tslint:disable-line
+        chai.expect(Reflect.getOwnMetadata(MetadataKey.EVENT_HANDLER, target.constructor)).to.deep.equal([{
+            events: [{
+                s3: {
+                    bucket,
+                    event
+                }
+            }, {
+                http: {
+                    path,
+                    method
+                }
+            }],
+            middleware: [middleware, middlewareTwo],
+            target,
+            propertyKey
+        }]);
+    });
+
 });
