@@ -23,6 +23,15 @@ export function HttpHandler(path: string, method: "GET" | "POST" | "DELETE" | "P
     }]);
 }
 
+export function S3Handler(bucket: string, event: string, ...middleware: any[]): any {
+    return (target, propertyKey: string, descriptor: PropertyDescriptor) => register(target, propertyKey, middleware, [{
+        s3: {
+            bucket,
+            event
+        }
+    }]);
+}
+
 // attaches generic event handler
 export function Handler(...events: IHandlerEvent[]): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register(target, propertyKey, [], events);
