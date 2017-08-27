@@ -212,6 +212,22 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
+### RequestHeaderValue
+
+`RequestHeaderValue` resolves a value from the request headers.
+
+```ts
+    @HttpHandler("/testing", "GET")
+    public testing(@RequestHeaderValue("Content-Type") one: any): any {
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                one
+            })
+        };
+    }
+```
+
 ### HttpHandler
 
 `HttpHandler` defines a handler that will listen for a http event. It requires the path and the method to watch for with the optional ability to have middleware. The middleware is called in the order that it is registered.
