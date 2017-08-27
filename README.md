@@ -238,10 +238,17 @@ class TestService {
 
 ```
 
+## Generator
+The generator is the core of `serverless-inversify-util`. It gathers all of the metadata, converts the metadata into a serverless.yml file, generates a handler.js file which maps all of the service handler's to the serverless.yml config, and finally moves all of the necessary files into a folder which is ready to be deployed using `serverless deploy`.
+
+The generator can be extended or used in your own script to allow custom variations of script generation. This may be useful to add automatic deployment for each service or to even build multiple services.
+
+The best way to understand how the generator works is to simply take a look at the `execute` method in [generator.ts](typescript/lib/script/generator.ts).
+
 ## TODO
-1. Get tests up and running correctly, need a solid way of testing the template logic as well.
-2. Include more of the serverless config definition in the `Service` decorator. Next step will be resources.
-3. Allow multiple services to be registered.
-4. Clean up the code as much as possible and potentially remove some of the dependencies.
-5. Webpack support through plugins?
-6. More default handlers (e.g. S3, etc)
+1. Include more of the serverless config definition in the `Service` decorator. 
+2. Allow multiple services to be registered.
+    1. Accept multiple input entry files. We need to be able to compile and build each service separately.
+3. Webpack support through plugins?
+4. More default handlers (e.g. S3, etc)
+5. Add more documentation around Generator class

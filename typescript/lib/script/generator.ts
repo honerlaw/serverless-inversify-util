@@ -37,8 +37,6 @@ export class Generator {
         this.mainJsPath = this.mainPath.replace(Generator.CURRENT_DIR, "").replace(".ts", ".js");
         this.compilerOptions = (typeof config === "string" ?
             JSON.parse(fs.readFileSync(path.resolve(config)).toString()).compilerOptions : config);
-        this.compilerOptions.moduleResolution = (this.compilerOptions.moduleResolution as any) === "node" ? 2 : 1;
-        this.compilerOptions.listEmittedFiles = true;
     }
 
     public execute(binDir: string = "./bin"): void {
@@ -122,7 +120,9 @@ export class Generator {
         }
 
         const contents: string = fs.readFileSync(tsFilePath).toString();
-        const compilerOptions: ts.CompilerOptions = {};
+        const compilerOptions: ts.CompilerOptions = {
+            target: ts.ScriptTarget.ES5
+        };
 
         const outputs: any[] = [];
 
@@ -152,6 +152,13 @@ export class Generator {
     }
 
     private compile(outDir: string): string[] {
+        // @todo better conversion of compiler options
+        this.compilerOptions.moduleResolution = ts.ModuleResolutionKind.NodeJs;
+        if ((this.compilerOptions.moduleResolution as any) !== "node") {
+            this.compilerOptions.moduleResolution = ts.ModuleResolutionKind.Classic;
+        }
+        this.compilerOptions.listEmittedFiles = true;
+        this.compilerOptions.target = ts.ScriptTarget.ES5;
         this.compilerOptions.outDir = path.resolve(outDir);
         this.compilerOptions.sourceMap = false;
         const program: ts.Program = ts.createProgram([this.mainPath], this.compilerOptions);
