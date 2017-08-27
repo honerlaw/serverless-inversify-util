@@ -7,6 +7,12 @@ export const TYPE = {
     EventHandler: "event_handler"
 };
 
+export interface IHttpEventResponse {
+    statusCode?: number;
+    body?: string;
+    [key: string]: any;
+}
+
 // tslint:disable-next-line
 export interface IService {}
 
