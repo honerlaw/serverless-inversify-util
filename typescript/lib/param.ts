@@ -1,8 +1,14 @@
 import {MetadataKey} from "./service";
 
+export type ParseFunction = (val: any) => any;
+
+export type ParamType = "body" | "path" | "param" | "context" | "event"
+    | "event_value" | "context_value" | "header_value";
+
 export interface IParam {
-    type: "body" | "path" | "param" | "context" | "event" | "event_value" | "context_value" | "header_value";
+    type: ParamType;
     name?: string;
+    parse?: ParseFunction;
 }
 
 export interface IParamMetadata {
@@ -13,26 +19,29 @@ export interface IParamMetadata {
 }
 
 // grab a param from query string
-export function RequestParam(name: string): any {
+export function RequestParam(name: string, parse?: ParseFunction): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
         type: "param",
-        name
+        name,
+        parse
     }, target, propertyKey, descriptor);
 }
 
 // grab param from the body
-export function RequestBody(name: string): any {
+export function RequestBody(name: string, parse?: ParseFunction): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
         type: "body",
-        name
+        name,
+        parse
     }, target, propertyKey, descriptor);
 }
 
 // grab param from a path parameter
-export function RequestPath(name: string): any {
+export function RequestPath(name: string, parse?: ParseFunction): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
         type: "path",
-        name
+        name,
+        parse
     }, target, propertyKey, descriptor);
 }
 
@@ -51,22 +60,25 @@ export function RequestContext(): any {
 }
 
 // return a value from the event (e.g. path = random.key would return event.random.key)
-export function RequestEventValue(path: string): any {
+export function RequestEventValue(path: string, parse?: ParseFunction): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
-        type: "event_value"
+        type: "event_value",
+        parse
     }, target, propertyKey, descriptor);
 }
 
 // return a value from the context (e.g. path = random.key would return context.random.key)
-export function RequestContextValue(path: string): any {
+export function RequestContextValue(path: string, parse?: ParseFunction): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
-        type: "context_value"
+        type: "context_value",
+        parse
     }, target, propertyKey, descriptor);
 }
 
-export function RequestHeaderValue(header: string): any {
+export function RequestHeaderValue(header: string, parse?: ParseFunction): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
-        type: "header_value"
+        type: "header_value",
+        parse
     }, target, propertyKey, descriptor);
 }
 

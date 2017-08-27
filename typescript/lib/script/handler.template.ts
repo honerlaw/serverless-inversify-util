@@ -1,7 +1,7 @@
 import {Container} from "inversify";
 import "reflect-metadata";
 import {IHandlerMetadata} from "../handler";
-import {IParamMetadata} from "../param";
+import {IParam, IParamMetadata} from "../param";
 
 // run the setup file
 require(".{{setup}}"); // tslint:disable-line
@@ -21,6 +21,13 @@ export function getValueFromObject(object: object, vals: string[], index: number
             return getValueFromObject(object[val], vals, ++index);
         }
     }
+}
+
+export function getParsedValue(data: IParam, val: string): any {
+    if (data.parse) {
+        return data.parse(val);
+    }
+    return val;
 }
 
 // Generic method to handle incoming event and correctly pass on to registered handlers
@@ -52,12 +59,14 @@ export function handle(methodName: string, handlerName: string, event, context, 
                     break;
                 case "path":
                     if (event && event.pathParameters) {
-                        passParams[metadataIndex] = event.pathParameters[metadata.data.name];
+                        passParams[metadataIndex] = getParsedValue(metadata.data,
+                            event.pathParameters[metadata.data.name]);
                     }
                     break;
                 case "param":
                     if (event && event.queryStringParameters) {
-                        passParams[metadataIndex] = event.queryStringParameters[metadata.data.name];
+                        passParams[metadataIndex] = getParsedValue(metadata.data,
+                            event.queryStringParameters[metadata.data.name]);
                     }
                     break;
                 case "body":
@@ -81,20 +90,24 @@ export function handle(methodName: string, handlerName: string, event, context, 
                         event.body = JSON.parse(event._body);
                     }
 
-                    passParams[metadataIndex] = event.body[metadata.data.name];
+                    passParams[metadataIndex] = getParsedValue(metadata.data,
+                        event.body[metadata.data.name]);
                     break;
                 case "event_value":
-                    passParams[metadataIndex] = getValueFromObject(event, metadata.data.name.split("."));
+                    const eventValue: any = getValueFromObject(event, metadata.data.name.split("."));
+                    passParams[metadataIndex] = getParsedValue(metadata.data, eventValue);
                     break;
                 case "context_value":
-                    passParams[metadataIndex] = getValueFromObject(context, metadata.data.name.split("."));
+                    const contextValue: any = getValueFromObject(context, metadata.data.name.split("."));
+                    passParams[metadataIndex] = getParsedValue(metadata.data, contextValue);
                     break;
                 case "header_value":
                     if (!event || !event.headers) {
                         return;
                     }
                     const headerKey: string = metadata.data.name;
-                    passParams[metadataIndex] = event.headers[headerKey.toLowerCase()] || event.headers[headerKey];
+                    const headerValue: any = event.headers[headerKey.toLowerCase()] || event.headers[headerKey];
+                    passParams[metadataIndex] = getParsedValue(metadata.data, headerValue);
                     break;
             }
         }
