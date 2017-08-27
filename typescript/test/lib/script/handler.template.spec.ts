@@ -184,6 +184,7 @@ describe("Handler Template", () => {
             singleParamTest("context_value", "deep.nested.value", "contextValue");
             singleParamTest("body", "random", "value");
             singleParamTest("header_value", "Content-Type", "application/json");
+            singleParamTest("event_value", "jwtPayload.id", undefined);
         });
 
         it("should correctly parse and return parameters in order", () => {
@@ -250,7 +251,8 @@ describe("Handler Template", () => {
 
     });
 
-    it("should get property off of object", () => {
+    describe("getValueFromObject", () => {
+
         const object: object = {
             random: {
                 property: {
@@ -259,15 +261,24 @@ describe("Handler Template", () => {
             }
         };
 
-        const val: string = template.getValueFromObject(object, "random.property.value".split("."));
-        const val2: string = template.getValueFromObject(object, "random".split("."));
+        it("should get property off of object", () => {
+            const val: string = template.getValueFromObject(object, "random.property.value".split("."));
+            const val2: string = template.getValueFromObject(object, "random".split("."));
 
-        chai.expect(val).to.equal("hello");
-        chai.expect(val2).to.deep.equal({
-            property: {
-                value: "hello"
-            }
+            chai.expect(val).to.equal("hello");
+            chai.expect(val2).to.deep.equal({
+                property: {
+                    value: "hello"
+                }
+            });
         });
+
+        it("should fail to get property off of object", () => {
+            const val: string = template.getValueFromObject(object, "unknown.property.value".split("."));
+
+            chai.expect(val).to.be.undefined; // tslint:disable-line
+        });
+
     });
 
 });

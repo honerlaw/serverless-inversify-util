@@ -63,6 +63,7 @@ export function RequestContext(): any {
 export function RequestEventValue(path: string, parse?: ParseFunction): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
         type: "event_value",
+        name: path,
         parse
     }, target, propertyKey, descriptor);
 }
@@ -71,6 +72,7 @@ export function RequestEventValue(path: string, parse?: ParseFunction): any {
 export function RequestContextValue(path: string, parse?: ParseFunction): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
         type: "context_value",
+        name: path,
         parse
     }, target, propertyKey, descriptor);
 }
@@ -78,6 +80,7 @@ export function RequestContextValue(path: string, parse?: ParseFunction): any {
 export function RequestHeaderValue(header: string, parse?: ParseFunction): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
         type: "header_value",
+        name: header,
         parse
     }, target, propertyKey, descriptor);
 }

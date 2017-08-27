@@ -51,6 +51,12 @@ function register(target: any, propertyKey: string, middleware: HandlerMiddlewar
     if (!Reflect.hasOwnMetadata(MetadataKey.EVENT_HANDLER, target.constructor)) {
         Reflect.defineMetadata(MetadataKey.EVENT_HANDLER, [metadata], target.constructor);
     } else {
-        Reflect.getOwnMetadata(MetadataKey.EVENT_HANDLER, target.constructor).push(metadata);
+        const found: IHandlerMetadata[] = Reflect.getOwnMetadata(MetadataKey.EVENT_HANDLER, target.constructor);
+        const matching: IHandlerMetadata[] = found.filter((handler) => handler.propertyKey === propertyKey);
+        if (matching.length === 1) {
+            matching[0].events = matching[0].events.concat(events);
+        } else {
+            found.push(metadata);
+        }
     }
 }
