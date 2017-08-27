@@ -136,10 +136,25 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
 
 `RequestEvent` resolves the event that serverless receives.
 
-
 ```ts
     @HttpHandler("/testing", "GET")
     public testing(@RequestEvent() event: any): any {
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                event
+            })
+        };
+    }
+```
+
+### RequestEventValue
+
+`RequestEventVaue` resolves a value that is on the event. For example, if `event.path.on.event` should be resolved, passing `path.on.event` would return the value from the event object.
+
+```ts
+    @HttpHandler("/testing", "GET")
+    public testing(@RequestEventValue("path.on.event") event: any): any {
         return {
             statusCode: 200,
             body: JSON.stringify({
@@ -153,10 +168,25 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
 
 `RequestContext` resolves the context that serverless receives.
 
-
 ```ts
     @HttpHandler("/testing", "GET")
     public testing(@RequestContext() ctx: any): any {
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                event
+            })
+        };
+    }
+```
+
+### RequestContextValue
+
+`RequestContextValue` resolves a value that is on the context. For example, if `context.path.on.context` should be resolved, passing `path.on.context` would return the value from the context object.
+
+```ts
+    @HttpHandler("/testing", "GET")
+    public testing(@RequestContextValue("path.on.context") ctx: any): any {
         return {
             statusCode: 200,
             body: JSON.stringify({

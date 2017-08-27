@@ -12,6 +12,17 @@ const lib = require(__filename.indexOf(".ts") !== -1 ? "../util" : "serverless-i
 
 const container: Container = lib.getContainer();
 
+export function getValueFromObject(object: object, vals: string[], index: number = 0): any {
+    const val: string = vals[index];
+    if (object.hasOwnProperty(val)) {
+        if (vals.length - 1 === index) {
+            return object[val];
+        } else {
+            return getValueFromObject(object[val], vals, ++index);
+        }
+    }
+}
+
 // Generic method to handle incoming event and correctly pass on to registered handlers
 export function handle(methodName: string, handlerName: string, event, context, callback) {
     const handler: any = container.getNamed(lib.TYPE.EventHandler, handlerName);
@@ -71,6 +82,12 @@ export function handle(methodName: string, handlerName: string, event, context, 
                     }
 
                     passParams[metadataIndex] = event.body[metadata.data.name];
+                    break;
+                case "event_value":
+                    passParams[metadataIndex] = getValueFromObject(event, metadata.data.name.split("."));
+                    break;
+                case "context_value":
+                    passParams[metadataIndex] = getValueFromObject(context, metadata.data.name.split("."));
                     break;
             }
         }

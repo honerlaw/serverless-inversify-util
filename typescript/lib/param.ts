@@ -1,7 +1,7 @@
 import {MetadataKey} from "./service";
 
 export interface IParam {
-    type: "body" | "path" | "param" | "context" | "event";
+    type: "body" | "path" | "param" | "context" | "event" | "event_value" | "context_value";
     name?: string;
 }
 
@@ -47,6 +47,20 @@ export function RequestEvent(): any {
 export function RequestContext(): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
         type: "context"
+    }, target, propertyKey, descriptor);
+}
+
+// return a value from the event (e.g. path = random.key would return event.random.key)
+export function RequestEventValue(path: string): any {
+    return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
+        type: "event_value"
+    }, target, propertyKey, descriptor);
+}
+
+// return a value from the context (e.g. path = random.key would return context.random.key)
+export function RequestContextValue(path: string): any {
+    return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
+        type: "context_value"
     }, target, propertyKey, descriptor);
 }
 

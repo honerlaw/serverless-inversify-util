@@ -231,4 +231,24 @@ describe("Handler Template", () => {
 
     });
 
+    it("should get property off of object", () => {
+        const object: object = {
+            random: {
+                property: {
+                    value: "hello"
+                }
+            }
+        };
+
+        const val: string = template.getValueFromObject(object, "random.property.value".split("."));
+        const val2: string = template.getValueFromObject(object, "random".split("."));
+
+        chai.expect(val).to.equal("hello");
+        chai.expect(val2).to.deep.equal({
+            property: {
+                value: "hello"
+            }
+        });
+    });
+
 });
