@@ -119,16 +119,32 @@ describe("Handler Template", () => {
     describe("parameter parsing", () => {
 
         const event: any = {
+            headers: {
+                "Content-Type": "application/json"
+            },
             queryStringParameters: {
                 testParamKey: "testParam"
             },
             pathParameters: {
                 testPathKey: "testPath"
-            }
+            },
+            deep: {
+                nested: {
+                    value: "eventValue"
+                }
+            },
+            body: JSON.stringify({
+                random: "value"
+            })
         };
 
         const context: any = {
-            key: "randomValue"
+            key: "randomValue",
+            deep: {
+                nested: {
+                    value: "contextValue"
+                }
+            }
         };
 
         const setup = (...params: IParam[]): void => {
@@ -164,7 +180,9 @@ describe("Handler Template", () => {
             singleParamTest("param", "testParamKey", "testParam");
             singleParamTest("path", "testPathKey", "testPath");
             singleParamTest("event", undefined, event);
-            singleParamTest("context", undefined, context);
+            singleParamTest("event_value", "deep.nested.value", "eventValue");
+            singleParamTest("context_value", "deep.nested.value", "contextValue");
+            singleParamTest("body", "random", "value");
         });
 
         it("should correctly parse and return parameters in order", () => {
