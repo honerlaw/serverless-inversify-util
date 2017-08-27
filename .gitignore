@@ -4,3 +4,6 @@ typescript/bin/
 bin/
 dist/
 test-bin/
+.DS_Store
+.nyc_output/
+coverage/
