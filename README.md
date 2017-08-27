@@ -168,7 +168,7 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
 
 ### RequestBody
 
-`RequestBody` resolves a value from the received body. **NOTE**: this is not implemented yet.
+`RequestBody` resolves a value from the received body. This assumes content type of either `application/json`, `application/x-www-form-urlencoded`, or `multipart/formdata`.
 
 ```ts
     @HttpHandler("/testing", "GET")
@@ -256,3 +256,6 @@ The best way to understand how the generator works is to simply take a look at t
 3. Webpack support through plugins?
 4. More default handlers (e.g. S3, etc)
 5. Add more documentation around Generator class
+5. Service level middleware (basically middleware that can be run first before every single event handler)
+6. Better body parsing.
+7. Move this list to github issues potentially.

@@ -50,7 +50,27 @@ export function handle(methodName: string, handlerName: string, event, context, 
                     }
                     break;
                 case "body":
-                    // @todo implement
+                    if (!event || !event.headers || !event.body) {
+                        return;
+                    }
+
+                    // @todo move to a service level middleware util
+                    const header: string = "Content-Type";
+                    const contentType: string = event.headers[header.toLowerCase()] || event.headers[header];
+                    if (contentType.indexOf("application/x-www-form-urlencoded") !== -1
+                        || contentType.indexOf("multipart/formdata") !== -1) {
+                        const body: Map<string, string> = new Map();
+                        event.body.split("&").map((val: string) => val.split("=")).forEach((pair: string[]) => {
+                            body.set(pair[0], pair[1]);
+                        });
+                        event._body = event.body;
+                        event.body = body;
+                    } else if (contentType.indexOf("application/json") !== -1) {
+                        event._body = event.body;
+                        event.body = JSON.parse(event._body);
+                    }
+
+                    passParams[metadataIndex] = event.body[metadata.data.name];
                     break;
             }
         }
