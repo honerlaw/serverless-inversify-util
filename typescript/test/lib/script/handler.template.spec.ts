@@ -183,6 +183,7 @@ describe("Handler Template", () => {
             singleParamTest("event_value", "deep.nested.value", "eventValue");
             singleParamTest("context_value", "deep.nested.value", "contextValue");
             singleParamTest("body", "random", "value");
+            singleParamTest("header_value", "Content-Type", "application/json");
         });
 
         it("should correctly parse and return parameters in order", () => {

@@ -89,6 +89,13 @@ export function handle(methodName: string, handlerName: string, event, context, 
                 case "context_value":
                     passParams[metadataIndex] = getValueFromObject(context, metadata.data.name.split("."));
                     break;
+                case "header_value":
+                    if (!event || !event.headers) {
+                        return;
+                    }
+                    const headerKey: string = metadata.data.name;
+                    passParams[metadataIndex] = event.headers[headerKey.toLowerCase()] || event.headers[headerKey];
+                    break;
             }
         }
     });

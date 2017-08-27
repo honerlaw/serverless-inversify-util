@@ -1,7 +1,7 @@
 import {MetadataKey} from "./service";
 
 export interface IParam {
-    type: "body" | "path" | "param" | "context" | "event" | "event_value" | "context_value";
+    type: "body" | "path" | "param" | "context" | "event" | "event_value" | "context_value" | "header_value";
     name?: string;
 }
 
@@ -61,6 +61,12 @@ export function RequestEventValue(path: string): any {
 export function RequestContextValue(path: string): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
         type: "context_value"
+    }, target, propertyKey, descriptor);
+}
+
+export function RequestHeaderValue(header: string): any {
+    return (target, propertyKey: string, descriptor: PropertyDescriptor) => register({
+        type: "header_value"
     }, target, propertyKey, descriptor);
 }
 
