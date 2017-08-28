@@ -87,7 +87,11 @@ export function handle(methodName: string, handlerName: string, event, context, 
                         event.body = body;
                     } else if (contentType.indexOf("application/json") !== -1) {
                         event._body = event.body;
-                        event.body = JSON.parse(event._body);
+                        try {
+                            event.body = JSON.parse(event._body);
+                        } catch (err) {
+                            // do nothing if failed
+                        }
                     }
 
                     passParams[metadataIndex] = getParsedValue(metadata.data,
