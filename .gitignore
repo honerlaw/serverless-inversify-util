@@ -7,3 +7,4 @@ test-bin/
 .DS_Store
 .nyc_output/
 coverage/
+.coveralls.yml
