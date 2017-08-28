@@ -8,7 +8,7 @@
     "serverless-inversify-util": "dist/lib/script/generate.js"
   },
   "scripts": {
-    "clean": "rm -rf ./bin ./dist ./typescript/bin ./test-bin ./nyc_output ./coverage && find ./typescript -type f -name *.js -delete",
+    "clean": "rm -rf ./bin ./dist ./typescript/bin ./test-bin ./.nyc_output ./coverage && find ./typescript -type f -name *.js -delete",
     "prepare": "npm run clean && tsc -p ./typescript/tsconfig.json",
     "generate": "ts-node ./typescript/script/generate.ts ./example/typescript/index.ts ./example/tsconfig.json",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
