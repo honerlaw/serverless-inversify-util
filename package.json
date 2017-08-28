@@ -17,8 +17,9 @@
   "author": "Derek Honerlaw",
   "license": "MIT",
   "nyc": {
-    "include": [
-      "**/*.ts"
+    "exclude": [
+      "**/test",
+      "test-bin"
     ],
     "extension": [
       ".ts"
@@ -28,8 +29,7 @@
       "lcov",
       "text-summary"
     ],
-    "all": true,
-    "instrument": false
+    "all": true
   },
   "dependencies": {
     "commander": "^2.11.0",
