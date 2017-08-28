@@ -182,7 +182,7 @@ describe("Handler", () => {
                     method
                 }
             }],
-            middleware: [middleware, middlewareTwo],
+            middleware: [middleware, middlewareTwo, middleware, middlewareTwo],
             target,
             propertyKey
         }]);

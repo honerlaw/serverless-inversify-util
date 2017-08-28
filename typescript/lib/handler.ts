@@ -55,6 +55,7 @@ function register(target: any, propertyKey: string, middleware: HandlerMiddlewar
         const matching: IHandlerMetadata[] = found.filter((handler) => handler.propertyKey === propertyKey);
         if (matching.length === 1) {
             matching[0].events = matching[0].events.concat(events);
+            matching[0].middleware = matching[0].middleware.concat(middleware);
         } else {
             found.push(metadata);
         }

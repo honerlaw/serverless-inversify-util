@@ -11,25 +11,23 @@
     "clean": "rm -rf ./bin ./dist ./typescript/bin ./test-bin ./nyc_output ./coverage && find ./typescript -type f -name *.js -delete",
     "prepare": "npm run clean && tsc -p ./typescript/tsconfig.json",
     "generate": "ts-node ./typescript/script/generate.ts ./example/typescript/index.ts ./example/tsconfig.json",
-    "test": "npm run clean && TS_NODE_PROJECT=./typescript/tsconfig.json nyc mocha -t 100000 --recursive --compilers ts:ts-node/register --bail ./typescript/test/lib"
+    "test": "npm run clean && TS_NODE_PROJECT=./typescript/tsconfig.json TS_NODE_CACHE=false nyc mocha -t 100000 --recursive --compilers ts:ts-node/register ./typescript/test/lib/$FILE"
   },
   "author": "Derek Honerlaw",
   "license": "MIT",
   "nyc": {
     "include": [
-        "**/*.ts"
+      "**/*.ts"
     ],
     "exclude": [
-        "**/test"
+      "**/test"
     ],
     "extension": [
       ".ts"
     ],
-    "require": [
-      "ts-node/register"
-    ],
     "reporter": [
       "html",
+      "lcov",
       "text-summary"
     ],
     "all": true,
@@ -40,7 +38,6 @@
     "fs-extra": "^4.0.1",
     "inversify": "^4.3.0",
     "reflect-metadata": "^0.1.10",
-    "typescript": "^2.4.2",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
@@ -57,6 +54,7 @@
     "proxyquire": "^1.8.0",
     "ts-node": "^3.3.0",
     "tslint": "^5.6.0",
-    "typemoq": "^2.0.1"
+    "typemoq": "^2.0.1",
+    "typescript": "^2.4.2"
   }
 }
