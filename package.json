@@ -20,9 +20,6 @@
     "include": [
       "**/*.ts"
     ],
-    "exclude": [
-      "**/test"
-    ],
     "extension": [
       ".ts"
     ],
