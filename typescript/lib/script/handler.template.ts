@@ -31,7 +31,7 @@ export function getParsedValue(data: IParam, val: string): any {
 }
 
 // Generic method to handle incoming event and correctly pass on to registered handlers
-export function handle(methodName: string, handlerName: string, event, context, callback) {
+export async function handle(methodName: string, handlerName: string, event, context, callback): Promise<void> {
     const handler: any = container.getNamed(lib.TYPE.EventHandler, handlerName);
     const method = handler[methodName];
 
@@ -117,7 +117,17 @@ export function handle(methodName: string, handlerName: string, event, context, 
         }
     });
 
-    const handlerError = (err) => {
+    try {
+        // wrap everything in a promise (handle both promise and non-promise)
+        if (foundHandlerMetadata) {
+            for (const middleware of foundHandlerMetadata.middleware) {
+                await middleware(event, context);
+            }
+        }
+        const resp: any = await method.apply(handler, passParams);
+
+        callback(null, resp);
+    } catch (err) {
         if (err.statusCode) {
             return callback(null, {
                 statusCode: err.statusCode,
@@ -127,26 +137,5 @@ export function handle(methodName: string, handlerName: string, event, context, 
             });
         }
         callback(err);
-    };
-
-    try {
-        // wrap everything in a promise (handle both promise and non-promise)
-        const promises: Array<Promise<any>> = [];
-        if (foundHandlerMetadata) {
-            foundHandlerMetadata.middleware.forEach((middleware) => {
-                promises.push(Promise.resolve(middleware(event, context)));
-            });
-        }
-        promises.push(Promise.resolve(method.apply(handler, passParams)));
-
-        // wait for everything to resolve
-        Promise.all(promises).then((values: any[]) => {
-
-            // the response is the last promises's result
-            callback(null, values[promises.length - 1]);
-        }).catch(handlerError);
-
-    } catch (err) {
-        handlerError(err);
     }
 }
