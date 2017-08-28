@@ -34,6 +34,11 @@ export function getPassParams(handler: any, method: any, methodName: string, eve
     // @todo if name is not supplied for path / param / body, use function parameter name instead
     const passParams: any[] = new Array(method.length);
     const params: IParamMetadata[] = Reflect.getOwnMetadata("param", handler.constructor);
+
+    if (!params) {
+        return passParams;
+    }
+
     params.forEach((metadata) => {
         if (metadata.propertyKey === methodName) {
             const metadataIndex: number = metadata.descriptor as number;

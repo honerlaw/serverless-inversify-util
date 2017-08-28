@@ -281,4 +281,29 @@ describe("Handler Template", () => {
 
     });
 
+    describe("No Params", () => {
+
+        beforeEach(() => {
+            Reflect.deleteMetadata("param", handler.constructor);
+        });
+
+        it("should correctly parse params when no params are available", () => {
+            const resp: any = {
+                statusCode: 200,
+                body: JSON.stringify({
+                    message: "success"
+                })
+            };
+            handler[methodName] = (param: any) => {
+                chai.expect(param).to.be.undefined; // tslint:disable-line
+                return resp;
+            };
+
+            template.handle(methodName, "handlerName", null, null, (err, val) => {
+                chai.expect(resp).to.deep.equal(val);
+            });
+        });
+
+    });
+
 });
