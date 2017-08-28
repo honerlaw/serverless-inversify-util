@@ -11,6 +11,7 @@
     "clean": "rm -rf ./bin ./dist ./typescript/bin ./test-bin ./nyc_output ./coverage && find ./typescript -type f -name *.js -delete",
     "prepare": "npm run clean && tsc -p ./typescript/tsconfig.json",
     "generate": "ts-node ./typescript/script/generate.ts ./example/typescript/index.ts ./example/tsconfig.json",
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
     "test": "npm run clean && TS_NODE_PROJECT=./typescript/tsconfig.json TS_NODE_CACHE=false nyc mocha -t 100000 --recursive --compilers ts:ts-node/register ./typescript/test/lib/$FILE"
   },
   "author": "Derek Honerlaw",
