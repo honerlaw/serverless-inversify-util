@@ -126,8 +126,8 @@ describe("Generator", () => {
         afterEach(() => {
             const dir: string = path.resolve("./test-bin");
             if (fs.existsSync(dir)) {
-                fs.emptyDirSync(dir);
-                fs.rmdirSync(dir);
+                // fs.emptyDirSync(dir);
+                // fs.rmdirSync(dir);
             }
         });
 

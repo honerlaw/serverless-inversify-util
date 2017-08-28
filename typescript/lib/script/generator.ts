@@ -14,11 +14,11 @@ export interface IMetadata {
     handlers: IHandlerMetadata[][];
 }
 
-const HANDLER_TEMPLATE: string = `function {{functionName}}(event, context, callback) {
+const HANDLER_TEMPLATE: string = `
+function {{functionName}}(event, context, callback) {
     handle("{{methodName}}", "{{handlerName}}", event, context, callback);
 }
 exports.{{functionName}} = {{functionName}};
-
 `;
 
 /**
@@ -77,7 +77,10 @@ export class Generator {
 
     private getContents(template: string, mainJsPath: string, metadatum: IMetadata): string {
         // @todo proper template engine
-        const contents: string[] = [template.replace(new RegExp("{{setup}}", "g"), mainJsPath)];
+
+        const temp: string = template.replace(new RegExp("{{setup}}", "g"), mainJsPath);
+
+        const contents: string[] = [temp];
         metadatum.handlers.forEach((handlers: IHandlerMetadata[]) => {
             handlers.forEach((handler) => {
                 const functionName: string = `${handler.target.constructor.name}_${handler.propertyKey}`;
@@ -179,7 +182,6 @@ export class Generator {
         this.compilerOptions.listEmittedFiles = true;
         this.compilerOptions.target = ts.ScriptTarget.ES5;
         this.compilerOptions.outDir = path.resolve(outDir);
-        this.compilerOptions.sourceMap = false;
         const program: ts.Program = ts.createProgram([this.mainPath], this.compilerOptions);
         return program.emit().emittedFiles;
     }

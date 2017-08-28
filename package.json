@@ -19,7 +19,8 @@
   "nyc": {
     "exclude": [
       "**/test",
-      "test-bin"
+      "test-bin",
+      "**/generate.ts"
     ],
     "extension": [
       ".ts"
