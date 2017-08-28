@@ -1,4 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/honerlaw/serverless-inversify-util/badge.svg?branch=master)](https://coveralls.io/github/honerlaw/serverless-inversify-util?branch=master)
+[![Build Status](https://travis-ci.org/honerlaw/serverless-inversify-util.svg?branch=master)](https://travis-ci.org/honerlaw/serverless-inversify-util)
 
 ## Serverless Inversify Util
 Serverless Inversify Util is a simple utility that wraps serverless config generation and mapping with inversify through decorators. This project was heavily inspired by the inversify-express-utils / routing-controllers / spring boot and other similar frameworks / libraries.
