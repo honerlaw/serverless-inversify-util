@@ -30,20 +30,7 @@ export function getParsedValue(data: IParam, val: string): any {
     return val;
 }
 
-// Generic method to handle incoming event and correctly pass on to registered handlers
-export async function handle(methodName: string, handlerName: string, event, context, callback): Promise<void> {
-    const handler: any = container.getNamed(lib.TYPE.EventHandler, handlerName);
-    const method = handler[methodName];
-
-    // get middleware for this handler's method
-    let foundHandlerMetadata;
-    const handlerMetadata: IHandlerMetadata[] = Reflect.getOwnMetadata("event_handler", handler.constructor);
-    handlerMetadata.forEach((metadata) => {
-        if (metadata.propertyKey === methodName) {
-            foundHandlerMetadata = metadata;
-        }
-    });
-
+export function getPassParams(handler: any, method: any, methodName: string, event: any, context: any): any[] {
     // @todo if name is not supplied for path / param / body, use function parameter name instead
     const passParams: any[] = new Array(method.length);
     const params: IParamMetadata[] = Reflect.getOwnMetadata("param", handler.constructor);
@@ -116,6 +103,22 @@ export async function handle(methodName: string, handlerName: string, event, con
             }
         }
     });
+    return passParams;
+}
+
+// Generic method to handle incoming event and correctly pass on to registered handlers
+export async function handle(methodName: string, handlerName: string, event, context, callback): Promise<void> {
+    const handler: any = container.getNamed(lib.TYPE.EventHandler, handlerName);
+    const method = handler[methodName];
+
+    // get middleware for this handler's method
+    let foundHandlerMetadata;
+    const handlerMetadata: IHandlerMetadata[] = Reflect.getOwnMetadata("event_handler", handler.constructor);
+    handlerMetadata.forEach((metadata) => {
+        if (metadata.propertyKey === methodName) {
+            foundHandlerMetadata = metadata;
+        }
+    });
 
     try {
         // wrap everything in a promise (handle both promise and non-promise)
@@ -124,6 +127,8 @@ export async function handle(methodName: string, handlerName: string, event, con
                 await middleware(event, context);
             }
         }
+
+        const passParams: any[] = getPassParams(handler, method, methodName, event, context);
         const resp: any = await method.apply(handler, passParams);
 
         callback(null, resp);
