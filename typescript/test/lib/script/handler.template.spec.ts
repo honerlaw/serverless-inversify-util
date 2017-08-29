@@ -85,7 +85,7 @@ describe("Handler Template", () => {
         });
     });
 
-    it("should test callback and call middleware", () => {
+    it("should test callback and call middleware", async () => {
         handler[methodName] = function () { // tslint:disable-line
             chai.expect(arguments.length).to.equal(0);
         };
@@ -98,9 +98,15 @@ describe("Handler Template", () => {
             randomCtx: "context"
         };
 
+        // test async function passed in with timeout
         const middleware: any = (e, c) => {
             chai.expect(e).to.deep.equal(event);
             chai.expect(c).to.deep.equal(c);
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve();
+                }, 500);
+            });
         };
 
         const metadata: IHandlerMetadata = {
@@ -110,12 +116,25 @@ describe("Handler Template", () => {
             target: handler.constructor
         };
 
-        Reflect.defineMetadata("event_handler", [metadata], handler.constructor);
+        // mock middleware to validate it wasn't called
+        const middlewareTwoFunc: TypeMoq.IMock<(e: any, c: any) => void> = TypeMoq.Mock
+            .ofInstance((e: any, c: any) => {}); // tslint:disable-line
 
-        template.handle(methodName, handlerName, event, context, (err, val) => {
+        const metadataTwo: IHandlerMetadata = {
+            events: [],
+            middleware: [middlewareTwoFunc.object],
+            propertyKey: "random",
+            target: handler.constructor
+        };
+
+        Reflect.defineMetadata("event_handler", [metadata, metadataTwo], handler.constructor);
+
+        await template.handle(methodName, handlerName, event, context, (err, val) => {
             chai.expect(err).to.be.null; // tslint:disable-line
             chai.expect(val).to.be.undefined; // tslint:disable-line
         });
+
+        middlewareTwoFunc.verify((x) => x(TypeMoq.It.isAny(), TypeMoq.It.isAny()), TypeMoq.Times.exactly(0));
     });
 
     describe("parameter parsing", () => {

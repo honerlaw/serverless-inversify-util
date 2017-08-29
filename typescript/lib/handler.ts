@@ -62,7 +62,7 @@ export function ErrorHandler(errorHandler: ErrorHandlerFunction): any {
         const metadata: IErrorHandlerMetadata = {
             handler: errorHandler
         };
-        Reflect.defineMetadata(MetadataKey.ERROR_HANDLER, metadata, target.constructor);
+        Reflect.defineMetadata(MetadataKey.ERROR_HANDLER, metadata, target);
     };
 }
 

@@ -161,7 +161,10 @@ describe("Handler", () => {
 
         const propertyKeyTwo: string = "test-property-two";
 
-        S3Handler(bucket, event)(target, propertyKey, null);
+        const middleware: HandlerMiddleware = (event: any, context: any) => { // tslint:disable-line
+        };
+
+        S3Handler(bucket, event, middleware)(target, propertyKey, null);
         S3Handler(bucketTwo, eventTwo)(target, propertyKeyTwo, null);
 
         chai.expect(Reflect.hasOwnMetadata(MetadataKey.EVENT_HANDLER, target.constructor)).to.be.true; // tslint:disable-line
@@ -172,7 +175,7 @@ describe("Handler", () => {
                     event
                 }
             }],
-            middleware: [],
+            middleware: [middleware],
             target,
             propertyKey
         }, {
@@ -247,11 +250,12 @@ describe("Handler", () => {
     describe("ErrorHandler", () => {
 
         it("should register error handler metadata", () => {
-            const errorHandler: ErrorHandlerFunction = (err: any) => {};
+            const errorHandler: ErrorHandlerFunction = (err: any) => {
+            };
 
             ErrorHandler(errorHandler)(target, null, null);
 
-            chai.expect(Reflect.getOwnMetadata(MetadataKey.ERROR_HANDLER, target.constructor)).to.deep.equal({
+            chai.expect(Reflect.getOwnMetadata(MetadataKey.ERROR_HANDLER, target)).to.deep.equal({
                 handler: errorHandler
             });
         });

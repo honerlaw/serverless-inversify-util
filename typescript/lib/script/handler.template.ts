@@ -127,22 +127,24 @@ export async function handle(methodName: string, handlerName: string, event, con
 
         // get middleware for this handler's method
         const handlerMetadata: IHandlerMetadata[] = Reflect.getOwnMetadata("event_handler", handler.constructor);
-        const foundMiddleware: HandlerMiddleware[] = handlerMetadata.map((metadata) => metadata.middleware)
+        const foundMiddleware: HandlerMiddleware[] = handlerMetadata
+            .filter((m) => m.propertyKey === methodName)
+            .map((metadata) => metadata.middleware)
             .reduce((prev, next) => prev.concat(next), []);
 
         for (const middleware of foundMiddleware) {
-            await middleware(event, context);
+            await Promise.resolve(middleware(event, context));
         }
 
         const passParams: any[] = getPassParams(handler, method, methodName, event, context);
-        const resp: any = await method.apply(handler, passParams);
+        const resp: any = await Promise.resolve(method.apply(handler, passParams));
 
         callback(null, resp);
     } catch (err) {
         const errorHandlerMetadata: IErrorHandlerMetadata = Reflect
             .getOwnMetadata("error_handler", handler.constructor);
         if (errorHandlerMetadata) {
-            const resp = errorHandlerMetadata.handler(err);
+            const resp = await Promise.resolve(errorHandlerMetadata.handler(err));
             if (resp !== undefined) {
                 callback(null, resp);
                 return;

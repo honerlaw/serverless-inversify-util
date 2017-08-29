@@ -68,6 +68,6 @@ export function Service(data: IServiceData): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => {
         Reflect.defineMetadata(MetadataKey.SERVICE, {
             data
-        }, target); // @todo convert to target.constructor
+        }, target);
     };
 }
