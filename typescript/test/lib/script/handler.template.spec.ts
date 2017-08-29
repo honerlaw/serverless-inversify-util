@@ -26,7 +26,7 @@ describe("Handler Template", () => {
                 TYPE: {
                     EventHandler: "event_handler"
                 },
-                getContainer: () => ContainerMock.target
+                getContainer: () => ContainerMock.object
             }
         });
 
@@ -84,7 +84,7 @@ describe("Handler Template", () => {
     });
 
     it("should test callback and call middleware", () => {
-        handler[methodName] = function() { // tslint:disable-line
+        handler[methodName] = function () { // tslint:disable-line
             chai.expect(arguments.length).to.equal(0);
         };
 
@@ -214,6 +214,22 @@ describe("Handler Template", () => {
             });
         });
 
+        it("should fail to find handler metadata", () => {
+            handler[methodName] = (param: string) => {
+                chai.expect(param).to.deep.equal("testParam");
+            };
+
+            setup({
+                type: "param",
+                name: "testParamKey"
+            });
+
+            template.handle("", "handlerName", event, context, (err, val) => {
+                chai.expect(err.message).to.equal("Method for event handler not found!"); // tslint:disable-line
+                chai.expect(val).to.be.undefined; // tslint:disable-line
+            });
+        });
+
         it("should correctly parse and return parameters in order even if unknown value", () => {
             handler[methodName] = (param: string, path: string, unknownPath: any,
                                    unknownParam: any, e: any, c: any) => {
@@ -247,6 +263,128 @@ describe("Handler Template", () => {
                 chai.expect(err).to.be.null; // tslint:disable-line
                 chai.expect(val).to.be.undefined; // tslint:disable-line
             });
+        });
+
+        it("should attempt to grab header information whether the header exists or not", () => {
+            const method: any = (param: any) => { // tslint:disable-line
+            };
+
+            setup({
+                type: "header_value",
+                name: "propKey"
+            });
+
+            const resOne: any[] = template.getPassParams(handler, method, methodName, null, {});
+            const resTwo: any[] = template.getPassParams(handler, method, methodName, {}, {});
+            const resThree: any[] = template.getPassParams(handler, method, methodName, {
+                headers: {}
+            }, {});
+            const resFour: any[] = template.getPassParams(handler, method, methodName, {
+                headers: {
+                    propKey: "hello"
+                }
+            }, {});
+
+            chai.expect(resOne).to.deep.equal([undefined]);
+            chai.expect(resTwo).to.deep.equal([undefined]);
+            chai.expect(resThree).to.deep.equal([undefined]);
+            chai.expect(resFour).to.deep.equal(["hello"]);
+        });
+
+        it("should attempt to parse and grab body value", () => {
+            const method: any = (param: any) => { // tslint:disable-line
+            };
+
+            setup({
+                type: "body",
+                name: "propKey"
+            });
+
+            const resOne: any[] = template.getPassParams(handler, method, methodName, null, {});
+            const resTwo: any[] = template.getPassParams(handler, method, methodName, {}, {});
+            const resThree: any[] = template.getPassParams(handler, method, methodName, {
+                headers: {}
+            }, {});
+            const resFour: any[] = template.getPassParams(handler, method, methodName, {
+                body: {}
+            }, {});
+            const resFive: any[] = template.getPassParams(handler, method, methodName, {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: "propKey=random&propKeyTwo=randomTwo"
+            }, {});
+            const resSix: any[] = template.getPassParams(handler, method, methodName, {
+                headers: {
+                    "Content-Type": "unknown"
+                },
+                body: "propKey=random&propKeyTwo=randomTwo"
+            }, {});
+
+            chai.expect(resOne).to.deep.equal([undefined]);
+            chai.expect(resTwo).to.deep.equal([undefined]);
+            chai.expect(resThree).to.deep.equal([undefined]);
+            chai.expect(resFour).to.deep.equal([undefined]);
+            chai.expect(resFive).to.deep.equal(["random"]);
+            chai.expect(resSix).to.deep.equal([undefined]);
+        });
+
+        it("should do nothing with invalid method name", () => {
+            const method: any = (param: any) => { // tslint:disable-line
+            };
+
+            setup({
+                type: "param",
+                name: "test"
+            });
+
+            const params: any[] = template.getPassParams(handler, method, "", {}, {});
+
+            chai.expect(params).to.deep.equal([undefined]);
+        });
+
+        it("path param will be undefined if invalid event", () => {
+            const method: any = (param: any) => { // tslint:disable-line
+            };
+
+            setup({
+                type: "path",
+                name: "randomProp"
+            });
+
+            const resOne: any[] = template.getPassParams(handler, method, methodName, null, {});
+            const resTwo: any[] = template.getPassParams(handler, method, methodName, {}, {});
+            const resThree: any[] = template.getPassParams(handler, method, methodName, {
+                pathParameters: {
+                    randomProp: "hello"
+                }
+            }, {});
+
+            chai.expect(resOne).to.deep.equal([undefined]);
+            chai.expect(resTwo).to.deep.equal([undefined]);
+            chai.expect(resThree).to.deep.equal(["hello"]);
+        });
+
+        it("query param will be undefined if invalid event", () => {
+            const method: any = (param: any) => { // tslint:disable-line
+            };
+
+            setup({
+                type: "param",
+                name: "randomProp"
+            });
+
+            const resOne: any[] = template.getPassParams(handler, method, methodName, null, {});
+            const resTwo: any[] = template.getPassParams(handler, method, methodName, {}, {});
+            const resThree: any[] = template.getPassParams(handler, method, methodName, {
+                queryStringParameters: {
+                    randomProp: "hello"
+                }
+            }, {});
+
+            chai.expect(resOne).to.deep.equal([undefined]);
+            chai.expect(resTwo).to.deep.equal([undefined]);
+            chai.expect(resThree).to.deep.equal(["hello"]);
         });
 
     });
@@ -302,6 +440,28 @@ describe("Handler Template", () => {
             template.handle(methodName, "handlerName", null, null, (err, val) => {
                 chai.expect(resp).to.deep.equal(val);
             });
+        });
+
+    });
+
+    describe("getParsedValue", () => {
+
+        it("should parse value with given parser", () => {
+            const val: number = template.getParsedValue({
+                type: "param",
+                parse: Number
+            }, "15");
+
+            chai.expect(val).to.be.a("number");
+        });
+
+        it("should not parse value at all", () => {
+            const testVal: string = "hello";
+            const val: any = template.getParsedValue({
+                type: "param"
+            }, testVal);
+
+            chai.expect(val).to.equal(testVal);
         });
 
     });

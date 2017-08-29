@@ -132,10 +132,12 @@ export class Generator {
         const tsFilePath: string = path.join(__dirname, "handler.template.ts");
         const jsFilePath: string = path.join(__dirname, "handler.template.js");
 
+        /* istanbul ignore next */
         if (fs.existsSync(jsFilePath)) {
             return fs.readFileSync(jsFilePath).toString();
         }
 
+        /* istanbul ignore next */
         if (!fs.existsSync(tsFilePath)) {
             console.error("Could not find event handler template!");
             process.exit(1);
@@ -158,15 +160,13 @@ export class Generator {
             writeFile: (name, text, writeByteOrderMark) => {
                 outputs.push({name, text, writeByteOrderMark});
             },
-            readFile: () => "",
             fileExists: () => true,
-            getDirectories: () => [],
             getDefaultLibFileName: (options: ts.CompilerOptions) => "lib.d.ts",
             useCaseSensitiveFileNames: () => false,
             getCanonicalFileName: (filename) => filename,
             getCurrentDirectory: () => "",
             getNewLine: () => "\n"
-        };
+        } as any;
 
         ts.createProgram(["template.ts"], compilerOptions, compilerHost).emit();
 
@@ -203,6 +203,8 @@ export class Generator {
         if (this.deploy !== true) {
             return;
         }
+
+        /* istanbul ignore next */
         child.exec(`cd ${outDir} && serverless deploy`, (error: Error, stdout: string, stderr: string) => {
             if (error) {
                 console.error(error);
@@ -235,12 +237,15 @@ export class Generator {
         }
 
         // hack to allow running local and when a package
+        /* istanbul ignore next */
         return require(__filename.indexOf(".ts") !== -1 ? "../index" : "serverless-inversify-util").getContainer();
     }
 
     private getService(emittedFiles: string[]): IService {
         const container: Container = this.getContainer(emittedFiles);
         const services: IService[] = container.getAll<IService>(TYPE.Service);
+
+        /* istanbul ignore next */
         if (services.length !== 1) {
             console.error("You can only have one service per entry file!");
             process.exit(1);

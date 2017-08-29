@@ -1,6 +1,6 @@
 import {Container} from "inversify";
 import "reflect-metadata";
-import {IHandlerMetadata} from "../handler";
+import {HandlerMiddleware, IHandlerMetadata} from "../handler";
 import {IParam, IParamMetadata} from "../param";
 
 // run the setup file
@@ -8,6 +8,7 @@ require(".{{setup}}"); // tslint:disable-line
 
 // get serverless-decorators lib in order to get the inversify container
 // hack to allow running local and when a package
+/* istanbul ignore next */
 const lib = require(__filename.indexOf(".ts") !== -1 ? "../util" : "serverless-inversify-util"); // tslint:disable-line
 
 const container: Container = lib.getContainer();
@@ -63,7 +64,7 @@ export function getPassParams(handler: any, method: any, methodName: string, eve
                     break;
                 case "body":
                     if (!event || !event.headers || !event.body) {
-                        return;
+                        break;
                     }
 
                     // @todo move to a service level middleware util
@@ -71,9 +72,9 @@ export function getPassParams(handler: any, method: any, methodName: string, eve
                     const contentType: string = event.headers[header.toLowerCase()] || event.headers[header];
                     if (contentType.indexOf("application/x-www-form-urlencoded") !== -1
                         || contentType.indexOf("multipart/formdata") !== -1) {
-                        const body: Map<string, string> = new Map();
+                        const body: { [key: string]: string } = {};
                         event.body.split("&").map((val: string) => val.split("=")).forEach((pair: string[]) => {
-                            body.set(pair[0], pair[1]);
+                            body[pair[0]] = pair[1];
                         });
                         event._body = event.body;
                         event.body = body;
@@ -99,7 +100,7 @@ export function getPassParams(handler: any, method: any, methodName: string, eve
                     break;
                 case "header_value":
                     if (!event || !event.headers) {
-                        return;
+                        break;
                     }
                     const headerKey: string = metadata.data.name;
                     const headerValue: any = event.headers[headerKey.toLowerCase()] || event.headers[headerKey];
@@ -113,24 +114,22 @@ export function getPassParams(handler: any, method: any, methodName: string, eve
 
 // Generic method to handle incoming event and correctly pass on to registered handlers
 export async function handle(methodName: string, handlerName: string, event, context, callback): Promise<void> {
-    const handler: any = container.getNamed(lib.TYPE.EventHandler, handlerName);
-    const method = handler[methodName];
-
-    // get middleware for this handler's method
-    let foundHandlerMetadata;
-    const handlerMetadata: IHandlerMetadata[] = Reflect.getOwnMetadata("event_handler", handler.constructor);
-    handlerMetadata.forEach((metadata) => {
-        if (metadata.propertyKey === methodName) {
-            foundHandlerMetadata = metadata;
-        }
-    });
-
     try {
-        // wrap everything in a promise (handle both promise and non-promise)
-        if (foundHandlerMetadata) {
-            for (const middleware of foundHandlerMetadata.middleware) {
-                await middleware(event, context);
-            }
+        const handler: any = container.getNamed(lib.TYPE.EventHandler, handlerName);
+        const method = handler[methodName];
+
+        if (!method) {
+            callback(new Error("Method for event handler not found!"));
+            return;
+        }
+
+        // get middleware for this handler's method
+        const handlerMetadata: IHandlerMetadata[] = Reflect.getOwnMetadata("event_handler", handler.constructor);
+        const foundMiddleware: HandlerMiddleware[] = handlerMetadata.map((metadata) => metadata.middleware)
+            .reduce((prev, next) => prev.concat(next), []);
+
+        for (const middleware of foundMiddleware) {
+            await middleware(event, context);
         }
 
         const passParams: any[] = getPassParams(handler, method, methodName, event, context);

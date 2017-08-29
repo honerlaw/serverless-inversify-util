@@ -103,7 +103,7 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
 
 ## Docs
 
-### RequestParam
+### `@RequestParam(name: string, parse?: ParseFunction)`
 
 `RequestParam` resolves a query parameter given the name of the parameter. The resolved value is not parsed in anyway.
 
@@ -119,7 +119,7 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
-### RequestPath
+### `@RequestPath(path: string, method: string, [middleware: MiddlewareFunction, ...])`
 
 `RequestPath` resolves a path parameter given the name of the parameter. The resolved value is not parsed in anyway.
 
@@ -135,7 +135,7 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
-### RequestEvent
+### `@RequestEvent()`
 
 `RequestEvent` resolves the event that serverless receives.
 
@@ -151,7 +151,7 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
-### RequestEventValue
+### `@RequestEventValue(name: string, parse?: ParseFunction)`
 
 `RequestEventVaue` resolves a value that is on the event. For example, if `event.path.on.event` should be resolved, passing `path.on.event` would return the value from the event object.
 
@@ -167,7 +167,7 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
-### RequestContext
+### `@RequestContext()`
 
 `RequestContext` resolves the context that serverless receives.
 
@@ -183,7 +183,7 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
-### RequestContextValue
+### `@RequestContextValue(name: string, parse?: ParseFunction)`
 
 `RequestContextValue` resolves a value that is on the context. For example, if `context.path.on.context` should be resolved, passing `path.on.context` would return the value from the context object.
 
@@ -199,7 +199,7 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
-### RequestBody
+### `@RequestBody(name: string, parse?: ParseFunction)`
 
 `RequestBody` resolves a value from the received body. This assumes content type of either `application/json`, `application/x-www-form-urlencoded`, or `multipart/formdata`.
 
@@ -215,7 +215,7 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
-### RequestHeaderValue
+### `@RequestHeaderValue(header: string, parse?: ParseFunction)`
 
 `RequestHeaderValue` resolves a value from the request headers.
 
@@ -231,7 +231,7 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
-### HttpHandler
+### `@HttpHandler(path: string, method: string, ...middleware: MiddlewareFunction)`
 
 `HttpHandler` defines a handler that will listen for a http event. It requires the path and the method to watch for with the optional ability to have middleware. The middleware is called in the order that it is registered.
 
@@ -244,16 +244,32 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
-### Handler
+### `@S3Handler(bucket: string, event: string, ...middleware: MiddlewareFunction)`
 
-`Handler` is a generic type of handler that can receive the configuration needed for any type of event. The metadata passed to it will be used to generate the corresponding serverless.yml config. The below example is equivalent to the `HttpHandler`
+`S3Handler` defines a handler that will listen for an s3 event. It requires the bucket that the event should watch and the event that will be triggered on the bucket. Middleware can optionally be added which will run before the handler is called.
+
+```ts
+    @S3Handler("random.s3.bucket", "s3:ObjectCreated:*", (event, context) => {})
+    public testing(): any {
+        return {
+            statusCode: 200
+        };
+    }
+```
+
+### `@Handler(...events: IHandlerEvent[])`
+
+`Handler` is a generic type of handler that can receive the configuration needed for any type of event. The metadata passed to it will be used to generate the corresponding serverless.yml config. The below example is equivalent to the `HttpHandler`.
 
 ```ts
     @Handler({
-        http: {
-            path: "/testing",
-            method: "GET"
-        }
+        eventMap: {
+            http: {
+                path: "/testing",
+                method: "GET"
+            }
+        },
+        middleware: [(event: any, context: any) => void]
     })
     public testing(): any {
         return {
@@ -262,7 +278,7 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
-### Service
+### `@Service(data: IServiceData)`
 
 `Service` defines the root of the serverless service and all of the necessary metadata to generate and deploy the service.
 

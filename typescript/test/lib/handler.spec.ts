@@ -74,11 +74,64 @@ describe("Handler", () => {
         const valueTwo: string = "two";
         const valueThree: string = "three";
 
+        const middleware: HandlerMiddleware = (event: any, context: any) => { // tslint:disable-line
+        };
+        const middlewareTwo: HandlerMiddleware = (event: any, context: any) => { // tslint:disable-line
+        };
+
         Handler({
-            custom: {
-                value,
-                valueTwo,
-                valueThree
+            eventMap: {
+                custom: {
+                    value,
+                    valueTwo,
+                    valueThree
+                }
+            },
+            middleware: [middleware]
+        }, {
+            eventMap: {
+                customTwo: {
+                    value,
+                    valueTwo,
+                    valueThree
+                }
+            },
+            middleware: [middlewareTwo]
+        })(target, propertyKey, null);
+
+        chai.expect(Reflect.hasOwnMetadata(MetadataKey.EVENT_HANDLER, target.constructor)).to.be.true; // tslint:disable-line
+        chai.expect(Reflect.getOwnMetadata(MetadataKey.EVENT_HANDLER, target.constructor)).to.deep.equal([{
+            events: [{
+                custom: {
+                    value,
+                    valueTwo,
+                    valueThree
+                },
+            }, {
+                customTwo: {
+                    value,
+                    valueTwo,
+                    valueThree
+                }
+            }],
+            middleware: [middleware, middlewareTwo],
+            target,
+            propertyKey
+        }]);
+    });
+
+    it("should register a custom handler without middleware", () => {
+        const value: string = "one";
+        const valueTwo: string = "two";
+        const valueThree: string = "three";
+
+        Handler({
+            eventMap: {
+                custom: {
+                    value,
+                    valueTwo,
+                    valueThree
+                }
             }
         })(target, propertyKey, null);
 
@@ -89,7 +142,7 @@ describe("Handler", () => {
                     value,
                     valueTwo,
                     valueThree
-                }
+                },
             }],
             middleware: [],
             target,

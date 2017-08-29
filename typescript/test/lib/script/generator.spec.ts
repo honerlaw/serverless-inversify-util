@@ -7,6 +7,8 @@ import {IHandlerMetadata} from "../../../lib/handler";
 import {Generator, IMetadata} from "../../../lib/script/generator";
 import {IServiceData} from "../../../lib/service";
 
+// @todo more encompassing tests, generator currently blocks out functionality that uses global values from imports or
+// @todo functionality that is specific to a non-local package
 describe("Generator", () => {
 
     const GeneratorMock: TypeMoq.IMock<Generator> = TypeMoq.Mock.ofType<Generator>(Generator,
@@ -50,9 +52,13 @@ describe("Generator", () => {
 
     it("should properly generate yaml config", () => {
         const testHandler: object = {};
+        (GeneratorMock.object as any).stage = "hello";
         const yaml: string = (GeneratorMock.object as any).getServerlessYAMLConfig({
             service: {
-                service: "this is the service name"
+                service: "this is the service name",
+                provider: {
+                    stage: "test"
+                },
             },
             handlers: [[{
                 events: [{
@@ -67,6 +73,8 @@ describe("Generator", () => {
         });
 
         chai.expect(yaml.replace(/[ \n]/g, "")).to.equal(`service: 'this is the service name'
+            provider:
+              stage: hello
             functions:
               propKey:
                 handler: handler.Object_propKey

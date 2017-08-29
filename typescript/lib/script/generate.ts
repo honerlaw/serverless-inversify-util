@@ -4,7 +4,7 @@ import * as commander from "commander";
 import {Generator} from "./generator";
 
 commander
-    .version("0.7.14")
+    .version("0.7.15")
     .option("-p, --project <project>", "relative path to tsconfig.json from project root directory")
     .option("-s, --service <service>", "relative path to service entry point from project root directory")
     .option("-d, --deploy [deploy]", "flag to run `serverless deploy`")
