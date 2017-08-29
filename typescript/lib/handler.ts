@@ -1,6 +1,11 @@
 import {MetadataKey} from "./service";
 
 export type HandlerMiddleware = (event: any, context: any) => void;
+export type ErrorHandlerFunction = (err: any) => void;
+
+export interface IErrorHandlerMetadata {
+    handler: ErrorHandlerFunction;
+}
 
 export interface IHandlerEventMap {
     [type: string]: {
@@ -50,6 +55,15 @@ export function S3Handler(bucket: string, event: string, ...middleware: HandlerM
 // attaches generic event handler
 export function Handler(...events: IHandlerEvent[]): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register(target, propertyKey, events);
+}
+
+export function ErrorHandler(errorHandler: ErrorHandlerFunction): any {
+    return (target, propertyKey: string, descriptor: PropertyDescriptor) => {
+        const metadata: IErrorHandlerMetadata = {
+            handler: errorHandler
+        };
+        Reflect.defineMetadata(MetadataKey.ERROR_HANDLER, metadata, target.constructor);
+    };
 }
 
 // property key and target will always be the same for all events

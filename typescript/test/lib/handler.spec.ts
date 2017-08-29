@@ -1,7 +1,10 @@
 import * as chai from "chai";
 import "mocha";
 import "reflect-metadata";
-import {Handler, HandlerMiddleware, HttpHandler, S3Handler} from "../../lib/handler";
+import {
+    ErrorHandler, ErrorHandlerFunction, Handler, HandlerMiddleware, HttpHandler,
+    S3Handler
+} from "../../lib/handler";
 import {MetadataKey} from "../../lib/service";
 
 describe("Handler", () => {
@@ -239,6 +242,20 @@ describe("Handler", () => {
             target,
             propertyKey
         }]);
+    });
+
+    describe("ErrorHandler", () => {
+
+        it("should register error handler metadata", () => {
+            const errorHandler: ErrorHandlerFunction = (err: any) => {};
+
+            ErrorHandler(errorHandler)(target, null, null);
+
+            chai.expect(Reflect.getOwnMetadata(MetadataKey.ERROR_HANDLER, target.constructor)).to.deep.equal({
+                handler: errorHandler
+            });
+        });
+
     });
 
 });

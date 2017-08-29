@@ -1,7 +1,9 @@
 import {Container} from "inversify";
 import "reflect-metadata";
-import {HandlerMiddleware, IHandlerMetadata} from "../handler";
+import {HandlerMiddleware, IErrorHandlerMetadata, IHandlerMetadata} from "../handler";
 import {IParam, IParamMetadata} from "../param";
+
+// @todo this file needs to be cleaned up...
 
 // run the setup file
 require(".{{setup}}"); // tslint:disable-line
@@ -114,8 +116,8 @@ export function getPassParams(handler: any, method: any, methodName: string, eve
 
 // Generic method to handle incoming event and correctly pass on to registered handlers
 export async function handle(methodName: string, handlerName: string, event, context, callback): Promise<void> {
+    const handler: any = container.getNamed(lib.TYPE.EventHandler, handlerName);
     try {
-        const handler: any = container.getNamed(lib.TYPE.EventHandler, handlerName);
         const method = handler[methodName];
 
         if (!method) {
@@ -137,6 +139,15 @@ export async function handle(methodName: string, handlerName: string, event, con
 
         callback(null, resp);
     } catch (err) {
+        const errorHandlerMetadata: IErrorHandlerMetadata = Reflect
+            .getOwnMetadata("error_handler", handler.constructor);
+        if (errorHandlerMetadata) {
+            const resp = errorHandlerMetadata.handler(err);
+            if (resp !== undefined) {
+                callback(null, resp);
+                return;
+            }
+        }
         if (err.statusCode) {
             return callback(null, {
                 statusCode: err.statusCode,

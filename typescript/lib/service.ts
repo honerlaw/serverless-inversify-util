@@ -59,6 +59,7 @@ export interface IServiceData {
 export enum MetadataKey {
     SERVICE = "service",
     EVENT_HANDLER = "event_handler",
+    ERROR_HANDLER = "error_handler",
     PARAM = "param"
 }
 

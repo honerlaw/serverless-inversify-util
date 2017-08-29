@@ -6,10 +6,12 @@ import "reflect-metadata";
 import * as TypeMoq from "typemoq";
 import {IHandlerMetadata} from "../../../lib/handler";
 import {IParam, IParamMetadata} from "../../../lib/param";
+import {MetadataKey} from "../../../lib/service";
 
 describe("Handler Template", () => {
 
     const methodName: string = "methodName";
+    const handlerName: string = "handlerName";
     const ContainerMock: TypeMoq.IMock<Container> = TypeMoq.Mock.ofType<Container>(Container);
     const handler: any = {};
 
@@ -17,7 +19,7 @@ describe("Handler Template", () => {
 
     beforeEach(() => {
         ContainerMock
-            .setup((x) => x.getNamed(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
+            .setup((x) => x.getNamed(TypeMoq.It.isAny(), handlerName))
             .returns((type: any, target: any) => handler);
 
         template = proxyquire.noCallThru().load("../../../lib/script/handler.template", {
@@ -47,7 +49,7 @@ describe("Handler Template", () => {
         };
         handler[methodName] = () => resp;
 
-        template.handle(methodName, "handlerName", null, null, (err, val) => {
+        template.handle(methodName, handlerName, null, null, (err, val) => {
             chai.expect(resp).to.deep.equal(val);
         });
     });
@@ -57,7 +59,7 @@ describe("Handler Template", () => {
             throw new Error("Hello world!");
         };
 
-        template.handle(methodName, "handlerName", null, null, (err, val) => {
+        template.handle(methodName, handlerName, null, null, (err, val) => {
             chai.expect(err).to.not.be.undefined; // tslint:disable-line
             chai.expect(err).to.not.be.null; // tslint:disable-line
             chai.expect(err.message).to.equal("Hello world!");
@@ -72,7 +74,7 @@ describe("Handler Template", () => {
             throw error;
         };
 
-        template.handle(methodName, "handlerName", null, null, (err, val) => {
+        template.handle(methodName, handlerName, null, null, (err, val) => {
             chai.expect(val).to.not.be.undefined; // tslint:disable-line
             chai.expect(val).to.not.be.null; // tslint:disable-line
             chai.expect(err).to.be.null; // tslint:disable-line
@@ -110,7 +112,7 @@ describe("Handler Template", () => {
 
         Reflect.defineMetadata("event_handler", [metadata], handler.constructor);
 
-        template.handle(methodName, "handlerName", event, context, (err, val) => {
+        template.handle(methodName, handlerName, event, context, (err, val) => {
             chai.expect(err).to.be.null; // tslint:disable-line
             chai.expect(val).to.be.undefined; // tslint:disable-line
         });
@@ -170,7 +172,7 @@ describe("Handler Template", () => {
                 name: key
             });
 
-            template.handle(methodName, "handlerName", event, context, (err, val) => {
+            template.handle(methodName, handlerName, event, context, (err, val) => {
                 chai.expect(err).to.be.null; // tslint:disable-line
                 chai.expect(val).to.be.undefined; // tslint:disable-line
             });
@@ -208,7 +210,7 @@ describe("Handler Template", () => {
                 type: "context"
             });
 
-            template.handle(methodName, "handlerName", event, context, (err, val) => {
+            template.handle(methodName, handlerName, event, context, (err, val) => {
                 chai.expect(err).to.be.null; // tslint:disable-line
                 chai.expect(val).to.be.undefined; // tslint:disable-line
             });
@@ -224,7 +226,7 @@ describe("Handler Template", () => {
                 name: "testParamKey"
             });
 
-            template.handle("", "handlerName", event, context, (err, val) => {
+            template.handle("", handlerName, event, context, (err, val) => {
                 chai.expect(err.message).to.equal("Method for event handler not found!"); // tslint:disable-line
                 chai.expect(val).to.be.undefined; // tslint:disable-line
             });
@@ -259,7 +261,7 @@ describe("Handler Template", () => {
                 type: "context"
             });
 
-            template.handle(methodName, "handlerName", event, context, (err, val) => {
+            template.handle(methodName, handlerName, event, context, (err, val) => {
                 chai.expect(err).to.be.null; // tslint:disable-line
                 chai.expect(val).to.be.undefined; // tslint:disable-line
             });
@@ -437,7 +439,7 @@ describe("Handler Template", () => {
                 return resp;
             };
 
-            template.handle(methodName, "handlerName", null, null, (err, val) => {
+            template.handle(methodName, handlerName, null, null, (err, val) => {
                 chai.expect(resp).to.deep.equal(val);
             });
         });
@@ -462,6 +464,64 @@ describe("Handler Template", () => {
             }, testVal);
 
             chai.expect(val).to.equal(testVal);
+        });
+
+    });
+
+    describe("ErrorHandler", () => {
+
+        it("should call error handler if an error is thrown and return the err in the event callback", () => {
+            const customHandler: object = {};
+            customHandler[methodName] = () => {
+                throw new Error("Error thrown in handler function");
+            };
+            const customHandlerName: string = "custom_handler_name";
+
+            Reflect.defineMetadata(MetadataKey.ERROR_HANDLER, {
+                handler: (err: any) => {
+                    chai.expect(err.message).to.equal("Error thrown in handler function");
+                }
+            }, handler.constructor);
+
+            ContainerMock
+                .setup((x) => x.getNamed(TypeMoq.It.isAny(), customHandlerName))
+                .returns((type: any, target: any) => customHandler);
+
+            template.handle(methodName, customHandlerName, methodName, {}, (err, res) => {
+                chai.expect(err.message).to.equal("Error thrown in handler function");
+                chai.expect(res).to.be.undefined; // tslint:disable-line
+            });
+        });
+
+        it("should call error handler if an error is thrown and return the error handler response", () => {
+            const customHandler: object = {};
+            customHandler[methodName] = () => {
+                throw new Error("Error thrown in handler function");
+            };
+            const customHandlerName: string = "custom_handler_name";
+
+            const customResp: any = {
+                statusCode: 500,
+                body: JSON.stringify({
+                    message: "custom error message"
+                })
+            };
+
+            Reflect.defineMetadata(MetadataKey.ERROR_HANDLER, {
+                handler: (err: any) => {
+                    chai.expect(err.message).to.equal("Error thrown in handler function");
+                    return customResp;
+                }
+            }, handler.constructor);
+
+            ContainerMock
+                .setup((x) => x.getNamed(TypeMoq.It.isAny(), customHandlerName))
+                .returns((type: any, target: any) => customHandler);
+
+            template.handle(methodName, customHandlerName, methodName, {}, (err, res) => {
+                chai.expect(err).to.be.null; // tslint:disable-line
+                chai.expect(res).to.equal(customResp);
+            });
         });
 
     });

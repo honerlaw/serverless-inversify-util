@@ -76,7 +76,7 @@ describe("Generator", () => {
             provider:
               stage: hello
             functions:
-              propKey:
+              Object_propKey:
                 handler: handler.Object_propKey
                 events:
                   -

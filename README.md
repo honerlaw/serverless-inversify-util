@@ -278,6 +278,38 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
+### `@ErrorHandler(errorHandler: ErrorHandlerFunction)`
+
+`ErrorHandler` is a class level decorator aimed at being able to catch / intercept all errors thrown by a given handler class. If the error handler function returns an object it will be sent out as the resp, otherwise it will be sent out as an error. (e.g. `callback(null, resp)` if the handler returns something, `callback(err)` otherwise).
+
+```ts
+
+const errorHandler: ErrorHandlerFunction = (err: any): any => {
+
+    // could also return undefined to propagate the err to the callback
+    return {
+        statusCode: 500,
+        body: JSON.stringify({
+            message: "My custom error message!",
+            error: err
+        })
+    }
+};
+
+@injectable()
+@ErrorHandler(errorHandler)
+export class TestErrorHandler {
+
+    @HttpMethod("/test", "GET")
+    public testing(): any {
+        throw new Error("This will trigger the error handler above!");
+    }
+
+}
+
+```
+
+
 ### `@Service(data: IServiceData)`
 
 `Service` defines the root of the serverless service and all of the necessary metadata to generate and deploy the service.

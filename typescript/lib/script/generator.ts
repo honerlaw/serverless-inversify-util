@@ -99,7 +99,7 @@ export class Generator {
         metadatum.handlers.forEach((handlers: IHandlerMetadata[]) => {
             handlers.forEach((handler) => {
                 const functionName: string = `${handler.target.constructor.name}_${handler.propertyKey}`;
-                functions[handler.propertyKey] = {
+                functions[functionName] = {
                     handler: `handler.${functionName}`,
                     events: handler.events
                 };
