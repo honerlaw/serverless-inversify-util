@@ -92,8 +92,17 @@ register(container);
 Finally, the deployment directory needs to be generated. This directory will contain a generated serverless.yml, a generated handler.js, node_modules directory, and your project's compiled typescript code.
 
 ```
-$ serverless-inversify-util -s ./path/to/entry_point.ts -p ./path/to/tsconfig.json -d -e test
+$ serverless-inversify-util -s ./path/to/entry_point.ts -p ./path/to/tsconfig.json -d -e test -t
 ```
+
+
+#### Options
+* `-s, --service` (Required) The path to the entry point file
+* `-p, --project` (Required) The path to the tsconfig to use for compilation
+* `-d, --deploy` (Optional) Flag that denotes whether to run serverless deploy after generation
+* `-e, --env` (Optional) The stage / environment that will override the stage defined in the service
+* `-t, --trim` (Optional) Flag to ptionally trim lambda service name to be less than 64 characters
+
 
 The service entry point (`-s`, `--service`) and the tsconfig path (`-p`, `--project`) are required. The paths can be absolute or relative.
 

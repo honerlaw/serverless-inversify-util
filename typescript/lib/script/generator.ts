@@ -26,6 +26,8 @@ exports.{{functionName}} = {{functionName}};
  * - better translation for compilerOptions (e.g. target "es5" becomes ts.ScriptTarget.ES5)
  */
 
+const MAX_LAMBDA_NAME_SIZE: number = 64;
+
 export class Generator {
 
     private static CURRENT_DIR: string = path.resolve();
@@ -38,15 +40,17 @@ export class Generator {
     private readonly mainJsPath: string;
     private readonly deploy: boolean;
     private readonly stage: string;
+    private readonly trim: boolean;
     private readonly compilerOptions: ts.CompilerOptions;
 
-    constructor(mainPath: string, config: string | object, deploy?: boolean, stage?: string) {
+    constructor(mainPath: string, config: string | object, deploy?: boolean, stage?: string, trim?: boolean) {
         this.mainPath = path.resolve(mainPath);
         this.mainJsPath = this.mainPath.replace(Generator.CURRENT_DIR, "").replace(".ts", ".js");
         this.compilerOptions = (typeof config === "string" ?
             JSON.parse(fs.readFileSync(path.resolve(config)).toString()).compilerOptions : config);
         this.deploy = deploy;
         this.stage = stage;
+        this.trim = trim;
     }
 
     public execute(binDir: string = "./bin"): void {
@@ -83,7 +87,7 @@ export class Generator {
         const contents: string[] = [temp];
         metadatum.handlers.forEach((handlers: IHandlerMetadata[]) => {
             handlers.forEach((handler) => {
-                const functionName: string = `${handler.target.constructor.name}_${handler.propertyKey}`;
+                const functionName: string = this.getFunctionName(metadatum.service, handler);
                 contents.push(HANDLER_TEMPLATE
                     .replace(new RegExp("{{functionName}}", "g"), functionName)
                     .replace(new RegExp("{{methodName}}", "g"), handler.propertyKey)
@@ -98,7 +102,7 @@ export class Generator {
         const functions: { [key: string]: object } = {};
         metadatum.handlers.forEach((handlers: IHandlerMetadata[]) => {
             handlers.forEach((handler) => {
-                const functionName: string = `${handler.target.constructor.name}_${handler.propertyKey}`;
+                const functionName: string = this.getFunctionName(metadatum.service, handler);
                 functions[functionName] = {
                     handler: `handler.${functionName}`,
                     events: handler.events
@@ -108,12 +112,7 @@ export class Generator {
         const clone: IMetadata = JSON.parse(JSON.stringify(metadatum));
         delete clone.service.handlers;
         (clone.service as any).functions = functions;
-
-        // set stage if applicable
-        if (this.stage) {
-            clone.service.provider.stage = this.stage;
-        }
-
+        clone.service.provider.stage = this.getStage(metadatum.service);
         return YAML.stringify(clone.service, Infinity, 2);
     }
 
@@ -139,8 +138,7 @@ export class Generator {
 
         /* istanbul ignore next */
         if (!fs.existsSync(tsFilePath)) {
-            console.error("Could not find event handler template!");
-            process.exit(1);
+            throw new Error("Could not find event handler template!");
         }
 
         const contents: string = fs.readFileSync(tsFilePath).toString();
@@ -204,14 +202,15 @@ export class Generator {
             return;
         }
 
-        /* istanbul ignore next */
-        child.exec(`cd ${outDir} && serverless deploy`, (error: Error, stdout: string, stderr: string) => {
-            if (error) {
-                console.error(error);
-                process.exit(1);
-            }
-            console.log(stdout, stderr);
-        });
+        const c: child.ChildProcess = child.exec(`cd ${outDir} && serverless deploy`,
+            /* istanbul ignore next */
+            (error: Error, stdout: string, stderr: string) => {
+                if (error) {
+                    throw error;
+                }
+            });
+        c.stderr.pipe(process.stdout);
+        c.stdout.pipe(process.stderr);
     }
 
     private copyNodeModules(outDir: string): void {
@@ -247,10 +246,54 @@ export class Generator {
 
         /* istanbul ignore next */
         if (services.length !== 1) {
-            console.error("You can only have one service per entry file!");
-            process.exit(1);
+            throw new Error("You can only have one service per entry file!");
         }
         return services[0];
+    }
+
+    private getStage(service: IServiceData): string {
+        if (this.stage) {
+            return this.stage;
+        }
+        return service.provider.stage;
+    }
+
+    private getFunctionName(service: IServiceData, handler: IHandlerMetadata): string {
+        const stage: string = this.getStage(service);
+        const functionName: string = `${handler.target.constructor.name}_${handler.propertyKey}`;
+        const prefix: string = `${service.service}-${stage}-`;
+        const fullName: string = `${prefix}${functionName}`;
+
+        if (prefix.length > MAX_LAMBDA_NAME_SIZE) {
+            throw new Error(`The service and stage name prefix '${prefix}' for the lambda name is too long!`);
+        }
+
+        // not trimming and full lambda name is greater than max size
+        if (this.trim !== true && fullName.length > MAX_LAMBDA_NAME_SIZE) {
+            throw new Error(`The full lambda name '${fullName}' is over 64 characters in length!
+            You can use the -t flag in order trim the class and method name or change them to be shorter.`);
+        }
+
+        if (this.trim !== true || fullName.length < MAX_LAMBDA_NAME_SIZE) {
+            return functionName;
+        }
+
+        // subtract the prefix and underscore that is used to split the class name and method name
+        const remaining: number = (MAX_LAMBDA_NAME_SIZE - prefix.length) - 1;
+
+        if (remaining <= 2) {
+            throw new Error(`The service and stage name prefix '${prefix}' for the lambda name is too long!`);
+        }
+
+        // split in half, give more characters to method name than class name
+        const size: number = remaining / 2;
+        const classNameLength: number = Math.floor(size);
+        const methodNameLength: number = Math.ceil(size);
+        const className: string = handler.target.constructor.name.substr(0, classNameLength);
+        const methodName: string = handler.propertyKey.substr(0, methodNameLength);
+
+        // return the trimmed serverless lamba function name without prefix (added by serverless deploy)
+        return `${className}_${methodName}`;
     }
 
 }
