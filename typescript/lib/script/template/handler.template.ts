@@ -5,7 +5,7 @@ import {IParam, IParamMetadata} from "../../param";
 import ".{{setup}}";
 
 // fetch serverless-inversify-lib, hack allows testing
-const lib = require("{{lib}}"); // tslint:disable-line
+const lib = require("serverless-inversify-util"); // tslint:disable-line
 
 // @todo this file needs to be cleaned up...
 const container: Container = lib.getContainer();

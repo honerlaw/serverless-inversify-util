@@ -2,8 +2,8 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import * as ts from "typescript";
 import {IHandlerMetadata} from "../../handler";
-import {IMetadata} from "../generator";
 import * as Compiler from "../compiler";
+import {IMetadata} from "../generator";
 import * as Util from "../util";
 
 const HANDLER_TEMPLATE: string = `
@@ -34,8 +34,7 @@ export class TemplateBuilder {
 
         // @todo proper template engine
         const temp: string = template
-            .replace(new RegExp("{{setup}}", "g"), this.mainJsPath)
-            .replace(new RegExp("{{lib}}", "g"), __filename.indexOf(".ts") ? "../util" : "serverless-inversify-util");
+            .replace(new RegExp("{{setup}}", "g"), this.mainJsPath);
 
         const contents: string[] = [temp];
         metadatum.handlers.forEach((handlers: IHandlerMetadata[]) => {

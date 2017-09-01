@@ -24,7 +24,7 @@ describe("Handler Template", () => {
 
         template = proxyquire.noCallThru().load("../../../../lib/script/template/handler.template", {
             ".{{setup}}": {},
-            "{{lib}}": {
+            "serverless-inversify-util": {
                 TYPE: {
                     EventHandler: "event_handler"
                 },

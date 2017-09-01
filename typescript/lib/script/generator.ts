@@ -64,6 +64,8 @@ export class Generator {
         // remove unneeded generated / compiled files
         fs.emptyDirSync(outDir);
         fs.rmdirSync(outDir);
+
+        await this.deploy(finalDir);
     }
 
     private pack(entry: string, outDir: string): Promise<webpack.Stats> {
