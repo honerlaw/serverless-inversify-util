@@ -4,9 +4,9 @@ import "mocha";
 import * as proxyquire from "proxyquire";
 import "reflect-metadata";
 import * as TypeMoq from "typemoq";
-import {IHandlerMetadata} from "../../../lib/handler";
-import {IParam, IParamMetadata} from "../../../lib/param";
-import {MetadataKey} from "../../../lib/service";
+import {IHandlerMetadata} from "../../../../lib/handler";
+import {IParam, IParamMetadata} from "../../../../lib/param";
+import {MetadataKey} from "../../../../lib/service";
 
 describe("Handler Template", () => {
 
@@ -22,9 +22,9 @@ describe("Handler Template", () => {
             .setup((x) => x.getNamed(TypeMoq.It.isAny(), handlerName))
             .returns((type: any, target: any) => handler);
 
-        template = proxyquire.noCallThru().load("../../../lib/script/handler.template", {
+        template = proxyquire.noCallThru().load("../../../../lib/script/template/handler.template", {
             ".{{setup}}": {},
-            "../util": {
+            "{{lib}}": {
                 TYPE: {
                     EventHandler: "event_handler"
                 },
@@ -102,7 +102,7 @@ describe("Handler Template", () => {
         const middleware: any = (e, c) => {
             chai.expect(e).to.deep.equal(event);
             chai.expect(c).to.deep.equal(c);
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 setTimeout(() => {
                     resolve();
                 }, 500);

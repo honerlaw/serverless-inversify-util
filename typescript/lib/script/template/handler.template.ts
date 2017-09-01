@@ -1,18 +1,13 @@
 import {Container} from "inversify";
 import "reflect-metadata";
-import {HandlerMiddleware, IErrorHandlerMetadata, IHandlerMetadata} from "../handler";
-import {IParam, IParamMetadata} from "../param";
+import {HandlerMiddleware, IErrorHandlerMetadata, IHandlerMetadata} from "../../handler";
+import {IParam, IParamMetadata} from "../../param";
+import ".{{setup}}";
+
+// fetch serverless-inversify-lib, hack allows testing
+const lib = require("{{lib}}"); // tslint:disable-line
 
 // @todo this file needs to be cleaned up...
-
-// run the setup file
-require(".{{setup}}"); // tslint:disable-line
-
-// get serverless-decorators lib in order to get the inversify container
-// hack to allow running local and when a package
-/* istanbul ignore next */
-const lib = require(__filename.indexOf(".ts") !== -1 ? "../util" : "serverless-inversify-util"); // tslint:disable-line
-
 const container: Container = lib.getContainer();
 
 export function getValueFromObject(object: object, vals: string[], index: number = 0): any {

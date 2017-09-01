@@ -2,7 +2,13 @@
 [![Build Status](https://travis-ci.org/honerlaw/serverless-inversify-util.svg?branch=master)](https://travis-ci.org/honerlaw/serverless-inversify-util)
 
 ## Serverless Inversify Util
-Serverless Inversify Util is a simple utility that wraps serverless config generation and mapping with inversify through decorators. This project was heavily inspired by the inversify-express-utils / routing-controllers / spring boot and other similar frameworks / libraries.
+Serverless Inversify Util is a simple utility that wraps serverless config generation, mapping, and packing. This is accomplished using inversify, decorators, TypeScript compiler, and webpack. This project was heavily inspired by the inversify-express-utils / routing-controllers / spring boot and other similar frameworks / libraries.
+
+This set of utilities is very opinionated in how they operate.
+
+#### ChangeLog
+
+To get an idea of changes between versions checkout the [changelog](CHANGELOG.md)
 
 ## Installation
 
@@ -349,9 +355,9 @@ class TestService {
 ```
 
 ## Generator
-The generator is the core of `serverless-inversify-util`. It gathers all of the metadata, converts the metadata into a serverless.yml file, generates a handler.js file which maps all of the service handler's to the serverless.yml config, and finally moves all of the necessary files into a folder which is ready to be deployed using `serverless deploy`.
+The generator is the core of `serverless-inversify-util`. It gathers all of the metadata, converts the metadata into a serverless.yml file, generates a handler.js file which maps all of the service handler's to the serverless.yml config, and finally packs all of the files using webpack which are ready to be deployed using `serverless deploy`.
 
-The generator can be extended or used in your own script to allow custom variations of script generation. This may be useful to add automatic deployment for each service or to even build multiple services.
+The generator can be extended or be used in your own script to allow custom variations of script generation. This may be useful to add automatic deployment for each service or to even build multiple services.
 
 The best way to understand how the generator works is to simply take a look at the `execute` method in [generator.ts](typescript/lib/script/generator.ts).
 
@@ -359,9 +365,9 @@ The best way to understand how the generator works is to simply take a look at t
 1. Include more of the serverless config definition in the `Service` decorator. 
 2. Allow multiple services to be registered.
     1. Accept multiple input entry files. We need to be able to compile and build each service separately.
-3. Webpack support through plugins?
-4. More default handlers (e.g. S3, etc)
-5. Add more documentation around Generator class
+3. More default handlers (e.g. S3, etc)
+4. Add more documentation around Generator class
 5. Service level middleware (basically middleware that can be run first before every single event handler)
 6. Better body parsing.
 7. Move this list to github issues potentially.
+8. Better webpack support (would be nice to somehow integrate ability to supply webpack.config.js or atleast a webpack config)
