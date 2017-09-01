@@ -1,6 +1,6 @@
 {
   "name": "serverless-inversify-util",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "description": "A set of decorators to be used with inversify to generate serverless config and handlers.",
   "main": "./dist/lib/index.js",
   "types": "./dist/types/lib/index.d.ts",
