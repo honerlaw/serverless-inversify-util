@@ -2,7 +2,7 @@ import * as chai from "chai";
 import "mocha";
 import "reflect-metadata";
 import {
-    ErrorHandler, ErrorHandlerFunction, Handler, HandlerMiddleware, HttpHandler,
+    ErrorHandler, ErrorHandlerFunction, Handler, HandlerMiddleware, HttpHandler, IoTHandler,
     S3Handler
 } from "../../lib/handler";
 import {MetadataKey} from "../../lib/service";
@@ -14,6 +14,28 @@ describe("Handler", () => {
 
     afterEach(() => {
         Reflect.deleteMetadata(MetadataKey.EVENT_HANDLER, target.constructor);
+    });
+
+    it("should register iot handler", () => {
+        const sql: string = "sql";
+        const name: string = "name";
+        const middleware: HandlerMiddleware = () => {
+            // do nothing
+        };
+
+        IoTHandler(sql, name, middleware)(target, propertyKey, null);
+
+        chai.expect(Reflect.getOwnMetadata(MetadataKey.EVENT_HANDLER, target.constructor)).to.deep.equal([{
+            events: [{
+                iot: {
+                    sql,
+                    name
+                }
+            }],
+            middleware: [middleware],
+            target,
+            propertyKey
+        }]);
     });
 
     it("should register http handler metadata", () => {

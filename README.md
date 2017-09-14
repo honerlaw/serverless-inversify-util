@@ -272,6 +272,17 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
+### `@IoTHandler(sql: string, name: string, ...middleware: MiddlewareFunction)`
+
+`IoTHandler` defines a handler that will listen for an IoT event. It requires the sql that the event should check and the name of the handler. Middleware can optionally be added which will run before the handler is called.
+
+```ts
+    @IoTHandler("select * from 'topic'", "eventHandlerName", (event, context) => {})
+    public testing(): void {
+        // do something
+    }
+```
+
 ### `@Handler(...events: IHandlerEvent[])`
 
 `Handler` is a generic type of handler that can receive the configuration needed for any type of event. The metadata passed to it will be used to generate the corresponding serverless.yml config. The below example is equivalent to the `HttpHandler`.

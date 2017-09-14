@@ -52,6 +52,18 @@ export function S3Handler(bucket: string, event: string, ...middleware: HandlerM
     }]);
 }
 
+export function IoTHandler(sql: string, name: string, ...middleware: HandlerMiddleware[]): any {
+    return (target, propertyKey: string, descriptor: PropertyDescriptor) => register(target, propertyKey, [{
+        eventMap: {
+            iot: {
+                name,
+                sql
+            }
+        },
+        middleware
+    }]);
+}
+
 // attaches generic event handler
 export function Handler(...events: IHandlerEvent[]): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register(target, propertyKey, events);
