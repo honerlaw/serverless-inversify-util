@@ -2,7 +2,9 @@
 [![Build Status](https://travis-ci.org/honerlaw/serverless-inversify-util.svg?branch=master)](https://travis-ci.org/honerlaw/serverless-inversify-util)
 
 ## Serverless Inversify Util
-Serverless Inversify Util is a simple utility that wraps serverless config generation, mapping, and packing. This is accomplished using inversify, decorators, TypeScript compiler, and webpack. This project was heavily inspired by the inversify-express-utils / routing-controllers / spring boot and other similar frameworks / libraries.
+This utility should be use in conjunction with the [serverless framework](https://serverless.com/).
+
+Serverless Inversify Util is a simple utility that wraps serverless framework's config generation, mapping, and packing. This is accomplished using inversify, decorators, TypeScript compiler, and webpack. This project was heavily inspired by the inversify-express-utils / routing-controllers / spring boot and other similar frameworks / libraries.
 
 This set of utilities is very opinionated in how they operate.
 
@@ -379,6 +381,4 @@ The best way to understand how the generator works is to simply take a look at t
 3. More default handlers (e.g. S3, etc)
 4. Add more documentation around Generator class
 5. Service level middleware (basically middleware that can be run first before every single event handler)
-6. Better body parsing.
-7. Move this list to github issues potentially.
-8. Better webpack support (would be nice to somehow integrate ability to supply webpack.config.js or atleast a webpack config)
+6. Better webpack support (would be nice to somehow integrate ability to supply webpack.config.js or atleast a webpack config)
