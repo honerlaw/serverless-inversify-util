@@ -274,6 +274,17 @@ There are two optional flags as well. `-d, --deploy` denotes whether the service
     }
 ```
 
+### `@ScheduleHandler(rate: string, options: IScheduleHandlerOptions, ...middleware: MiddlewareFunction)`
+
+`ScheduleHandler` defines a handler that will run a lambda on a schedule. It requires the rate at which to call the lambda and some options about the schedule. Middleware can optionally be added which will run before the handler is called.
+
+```ts
+    @ScheduleHandler("cron(0 12 * * ? *)", {enabled:true}, (event, context) => {})
+    public testing(): void {
+        // do something
+    }
+```
+
 ### `@IoTHandler(sql: string, name: string, ...middleware: MiddlewareFunction)`
 
 `IoTHandler` defines a handler that will listen for an IoT event. It requires the sql that the event should check and the name of the handler. Middleware can optionally be added which will run before the handler is called.
