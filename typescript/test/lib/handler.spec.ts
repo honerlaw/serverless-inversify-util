@@ -2,8 +2,8 @@ import * as chai from "chai";
 import "mocha";
 import "reflect-metadata";
 import {
-    ErrorHandler, ErrorHandlerFunction, Handler, HandlerMiddleware, HttpHandler, IoTHandler,
-    S3Handler
+    ErrorHandler, ErrorHandlerFunction, Handler, HandlerMiddleware, HttpHandler, IoTHandler, IScheduleHandlerOptions,
+    S3Handler, ScheduleHandler
 } from "../../lib/handler";
 import {MetadataKey} from "../../lib/service";
 
@@ -14,6 +14,30 @@ describe("Handler", () => {
 
     afterEach(() => {
         Reflect.deleteMetadata(MetadataKey.EVENT_HANDLER, target.constructor);
+    });
+
+    it("should register schedule handler", () => {
+        const rate: string = "cron(0 12 * * ? *)";
+        const options: IScheduleHandlerOptions = {
+            enabled: true
+        };
+        const middleware: HandlerMiddleware = () => {
+            // do nothing
+        };
+
+        ScheduleHandler(rate, options, middleware)(target, propertyKey, null);
+
+        chai.expect(Reflect.getOwnMetadata(MetadataKey.EVENT_HANDLER, target.constructor)).to.deep.equal([{
+            events: [{
+                schedule: {
+                    rate,
+                    ...options
+                }
+            }],
+            middleware: [middleware],
+            target,
+            propertyKey
+        }]);
     });
 
     it("should register iot handler", () => {

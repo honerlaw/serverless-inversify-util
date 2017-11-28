@@ -64,6 +64,26 @@ export function IoTHandler(sql: string, name: string, ...middleware: HandlerMidd
     }]);
 }
 
+export interface IScheduleHandlerOptions {
+    enabled: boolean;
+    input?: { [key: string]: any };
+    inputPath?: string;
+}
+
+export function ScheduleHandler(rate: string,
+                                options: IScheduleHandlerOptions,
+                                ...middleware: HandlerMiddleware[]): any {
+    return (target, propertyKey: string, descriptor: PropertyDescriptor) => register(target, propertyKey, [{
+        eventMap: {
+            schedule: {
+                rate,
+                ...options
+            }
+        },
+        middleware
+    }]);
+}
+
 // attaches generic event handler
 export function Handler(...events: IHandlerEvent[]): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register(target, propertyKey, events);
