@@ -1,6 +1,6 @@
 {
   "name": "serverless-inversify-util",
-  "version": "0.9.4",
+  "version": "0.10.0",
   "description": "A set of decorators to be used with inversify to generate serverless config and handlers.",
   "homepage": "https://github.com/honerlaw/serverless-inversify-util",
   "repository": {
