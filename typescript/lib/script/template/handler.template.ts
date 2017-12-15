@@ -165,12 +165,19 @@ export async function handle(serviceName: string,
             }
         }
         if (err.statusCode) {
-            return callback(null, {
+            let errorResponse: any = {
                 statusCode: err.statusCode,
                 body: JSON.stringify({
                     message: err.message
                 })
-            });
+            };
+
+            // also call post handle on the response out
+            if (service.postHandle) {
+                errorResponse = await service.postHandle.call(service, event, context, errorResponse);
+            }
+
+            return callback(null, errorResponse);
         }
         callback(err);
     }
