@@ -272,7 +272,7 @@ describe("Handler", () => {
         };
 
         S3Handler(bucket, event, middleware, middlewareTwo)(target, propertyKey, null);
-        HttpHandler(path, method, middleware, middlewareTwo)(target, propertyKey, null);
+        HttpHandler(path, method, null, middleware, middlewareTwo)(target, propertyKey, null);
 
         chai.expect(Reflect.hasOwnMetadata(MetadataKey.EVENT_HANDLER, target.constructor)).to.be.true; // tslint:disable-line
         chai.expect(Reflect.getOwnMetadata(MetadataKey.EVENT_HANDLER, target.constructor)).to.deep.equal([{

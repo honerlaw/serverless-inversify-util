@@ -50,7 +50,7 @@ export class Generator {
         });
 
         // build and write the handler.template file
-        const templateFilePath: string = this.TemplateBuilder.save(outDir, metadata);
+        const templateFilePath: string = this.TemplateBuilder.save(outDir, service, metadata);
 
         // where the final webpack file / serverless file exist
         const finalDir: string = path.resolve("./build");

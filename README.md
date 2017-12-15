@@ -45,6 +45,16 @@ import {TestHandler} from "./test-handler";
 @injectable()
 export class TestService {
 
+    public async preHandle(event: any, context: any): Promise<void> {
+        // optional method that will be triggered before every handler method
+    }
+    
+    public async postHandle(event: any, context: any, resp: any): Promise<any> {
+        // optional method that will be triggered after every handler method
+        // return the mutated response (or mutate the resp directly)
+        return resp;
+    }
+
 }
 ```
 

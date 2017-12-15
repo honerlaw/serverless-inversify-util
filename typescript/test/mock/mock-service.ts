@@ -1,6 +1,8 @@
 import {injectable} from "inversify";
 import "reflect-metadata";
+
 import {Service} from "../../lib/service";
+import {IService} from "../../lib/util";
 import {MockHandler} from "./mock-handler";
 
 @Service({
@@ -14,6 +16,6 @@ import {MockHandler} from "./mock-handler";
     handlers: [MockHandler]
 })
 @injectable()
-export class MockService {
+export class MockService implements IService {
 
 }

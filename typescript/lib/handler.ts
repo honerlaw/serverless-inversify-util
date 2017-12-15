@@ -25,15 +25,30 @@ export interface IHandlerMetadata {
     target: any;
 }
 
+export interface IHttpHandlerCorsOptions {
+    origin?: string;
+    headers?: string[];
+    allowCredentials?: boolean;
+}
+
+export interface IHttpHandlerOptions {
+    cors: boolean | IHttpHandlerCorsOptions;
+
+    // allow any other options
+    [key: string]: any;
+}
+
 // http specific event handler
 export function HttpHandler(path: string,
                             method: "GET" | "POST" | "DELETE" | "PUT",
+                            options?: Partial<IHttpHandlerOptions>,
                             ...middleware: HandlerMiddleware[]): any {
     return (target, propertyKey: string, descriptor: PropertyDescriptor) => register(target, propertyKey, [{
         eventMap: {
             http: {
+                ...options,
                 path,
-                method
+                method,
             },
         },
         middleware

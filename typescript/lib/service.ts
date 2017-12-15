@@ -54,6 +54,9 @@ export interface IServiceData {
         }
     };
     handlers: any[];
+
+    // @todo allow other properties to be set
+    [key: string]: any;
 }
 
 export enum MetadataKey {

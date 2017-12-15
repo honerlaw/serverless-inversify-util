@@ -36,6 +36,7 @@ export function getService(emittedFiles: string[]): IService {
     if (services.length !== 1) {
         throw new Error("You can only have one service per entry file!");
     }
+
     return services[0];
 }
 

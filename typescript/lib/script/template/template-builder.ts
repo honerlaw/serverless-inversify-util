@@ -2,13 +2,14 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import * as ts from "typescript";
 import {IHandlerMetadata} from "../../handler";
+import {IService} from "../../util";
 import * as Compiler from "../compiler";
 import {IMetadata} from "../generator";
 import * as Util from "../util";
 
 const HANDLER_TEMPLATE: string = `
 function {{functionName}}(event, context, callback) {
-    handle("{{methodName}}", "{{handlerName}}", event, context, callback);
+    handle("{{serviceName}}", "{{methodName}}", "{{handlerName}}", event, context, callback);
 }
 exports.{{functionName}} = {{functionName}};
 `;
@@ -23,13 +24,13 @@ export class TemplateBuilder {
             .replace(".ts", ".js");
     }
 
-    public save(dir: string, metadatum: IMetadata): string {
+    public save(dir: string, service: IService, metadatum: IMetadata): string {
         const fullPath: string = path.join(dir, "handler.js");
-        fs.writeFileSync(fullPath, this.getContents(metadatum));
+        fs.writeFileSync(fullPath, this.getContents(service, metadatum));
         return fullPath;
     }
 
-    private getContents(metadatum: IMetadata): string {
+    private getContents(service: IService, metadatum: IMetadata): string {
         const template: string = this.getTemplate();
 
         // @todo proper template engine
@@ -37,13 +38,14 @@ export class TemplateBuilder {
             .replace(new RegExp("{{setup}}", "g"), this.mainJsPath);
 
         const contents: string[] = [temp];
-        metadatum.handlers.forEach((handlers: IHandlerMetadata[]) => {
-            handlers.forEach((handler) => {
+        metadatum.handlers.forEach((handlers: IHandlerMetadata[]): void => {
+            handlers.forEach((handler): void => {
                 const functionName: string = Util.getFunctionName(metadatum, handler);
                 contents.push(HANDLER_TEMPLATE
+                    .replace(new RegExp("{{serviceName}}", "g"), service.constructor.name)
                     .replace(new RegExp("{{functionName}}", "g"), functionName)
                     .replace(new RegExp("{{methodName}}", "g"), handler.propertyKey)
-                    .replace(new RegExp("{{handlerName}}", "g"), `${handler.target.constructor.name}`));
+                    .replace(new RegExp("{{handlerName}}", "g"), handler.target.constructor.name));
             });
         });
         return contents.join("");

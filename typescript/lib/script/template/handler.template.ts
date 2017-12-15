@@ -2,6 +2,8 @@ import {Container} from "inversify";
 import "reflect-metadata";
 import {HandlerMiddleware, IErrorHandlerMetadata, IHandlerMetadata} from "../../handler";
 import {IParam, IParamMetadata} from "../../param";
+import {IService} from "../../util";
+
 import ".{{setup}}";
 
 // fetch serverless-inversify-lib, hack allows testing
@@ -109,8 +111,15 @@ export function getPassParams(handler: any, method: any, methodName: string, eve
     return passParams;
 }
 
+// @todo general global life cycle methods?
 // Generic method to handle incoming event and correctly pass on to registered handlers
-export async function handle(methodName: string, handlerName: string, event, context, callback): Promise<void> {
+export async function handle(serviceName: string,
+                             methodName: string,
+                             handlerName: string,
+                             event: any,
+                             context: any,
+                             callback: (err: any, resp?: any) => void): Promise<void> {
+    const service: IService = container.getNamed(lib.TYPE.Service, serviceName);
     const handler: any = container.getNamed(lib.TYPE.EventHandler, handlerName);
     try {
         const method = handler[methodName];
@@ -118,6 +127,11 @@ export async function handle(methodName: string, handlerName: string, event, con
         if (!method) {
             callback(new Error("Method for event handler not found!"));
             return;
+        }
+
+        // trigger global pre-handle method
+        if (service.preHandle) {
+            await service.preHandle.call(service, event, context);
         }
 
         // get middleware for this handler's method
@@ -132,7 +146,12 @@ export async function handle(methodName: string, handlerName: string, event, con
         }
 
         const passParams: any[] = getPassParams(handler, method, methodName, event, context);
-        const resp: any = await Promise.resolve(method.apply(handler, passParams));
+        let resp: any = await Promise.resolve(method.apply(handler, passParams));
+
+        // trigger global post-handle method
+        if (service.postHandle) {
+            resp = await service.postHandle.call(service, event, context, resp);
+        }
 
         callback(null, resp);
     } catch (err) {

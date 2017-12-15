@@ -24,7 +24,7 @@ describe("TemplateBuilder", () => {
         TemplateBuilderMock.setup((x: any) => x.getTemplate()).returns(() => template);
         (TemplateBuilderMock as any).object.mainJsPath = reqPath;
 
-        const contents: string = (TemplateBuilderMock.object as any).getContents({
+        const contents: string = (TemplateBuilderMock.object as any).getContents({}, {
             service: {
                 provider: {
                     stage: "test"
@@ -40,7 +40,7 @@ describe("TemplateBuilder", () => {
 
         chai.expect(contents.replace(/[ \n]/g, "")).to.equal(`require("path/to/things");
             function Object_propertyKey(event, context, callback) {
-                handle("propertyKey", "Object", event, context, callback);
+                handle("Object", "propertyKey", "Object", event, context, callback);
             }
             exports.Object_propertyKey = Object_propertyKey;
             `.replace(/[ \n]/g, ""));
@@ -66,7 +66,7 @@ describe("TemplateBuilder", () => {
                 TypeMoq.MockBehavior.Loose, false, "");
             builder.setup((x: any) => x.getContents()).returns(() => contents);
 
-            builder.object.save(dir, null);
+            builder.object.save(dir, null, null);
         });
 
     });

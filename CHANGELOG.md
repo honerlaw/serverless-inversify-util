@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2017-12-14
+### Added
+- `IService` now has `preHandle` and `postHandle` methods that are executed before / after every single handler method.
+- `HttpHandler` has an options object to add custom options to the serverless config
+### Changed
+- Updated README
+- Updated Tests
+- Updated dependencies to latest
+
 ## [0.9.4] - 2017-11-27
 ### Added
 - ScheduleHandler and associated tests
